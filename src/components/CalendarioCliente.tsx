@@ -186,7 +186,7 @@ export function CalendarioCliente({
       )}
 
       {/* Grupos por fecha */}
-      {[...grupos.entries()].map(([fecha, lista]) => (
+      {Array.from(grupos.entries()).map(([fecha, lista]) => (
         <section key={fecha}>
           <h3 className="text-[11px] uppercase tracking-widest text-[var(--color-text-dim)] font-bold mb-2.5">
             {fechaHeader(fecha)}
