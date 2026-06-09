@@ -135,3 +135,16 @@ export async function getNoticias(n = 3): Promise<Noticia[]> {
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as Noticia));
   } catch { return []; }
 }
+
+/** Todos los partidos de una categoría (ordenados por fecha desc). */
+export async function getPartidosPorCategoria(cat: CategoriaId, max = 300): Promise<Partido[]> {
+  const db = getDb();
+  try {
+    const snap = await getDocs(query(
+      collection(db, colName('calendario', cat)),
+      orderBy('fechaAsignada', 'desc'),
+      limit(max)
+    ));
+    return snap.docs.map(d => ({ id: d.id, ...d.data(), categoria: cat } as Partido));
+  } catch { return []; }
+}
