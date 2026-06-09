@@ -9,10 +9,7 @@ import { getPartidosPorCategoria, getEquipos } from '@/lib/queries';
 import { CalendarioCliente } from '@/components/CalendarioCliente';
 
 export const revalidate = 60;
-
-export function generateStaticParams() {
-  return CATEGORIAS.map(c => ({ categoria: c.id }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: { categoria: string } }): Promise<Metadata> {
   const cat = CATEGORIAS.find(c => c.id === params.categoria);

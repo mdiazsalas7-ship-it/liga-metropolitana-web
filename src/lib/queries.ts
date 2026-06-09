@@ -48,8 +48,9 @@ export async function getProximosPartidos(n = 6): Promise<Partido[]> {
       ));
       snap.forEach(d => {
         const data = d.data() as any;
-        if (data.estatus === 'programado' && (data.fechaAsignada || '') >= today) {
-          all.push({ id: d.id, ...data, categoria: cat.id });
+        const fecha = typeof data.fechaAsignada === 'string' ? data.fechaAsignada : '';
+        if (data.estatus === 'programado' && fecha >= today) {
+          all.push({ id: d.id, ...data, fechaAsignada: fecha, categoria: cat.id });
         }
       });
     } catch { /* col no existe */ }
@@ -57,9 +58,13 @@ export async function getProximosPartidos(n = 6): Promise<Partido[]> {
 
   return all
     .sort((a, b) => {
-      const f = (a.fechaAsignada || '').localeCompare(b.fechaAsignada || '');
+      const fa = typeof a.fechaAsignada === 'string' ? a.fechaAsignada : '';
+      const fb = typeof b.fechaAsignada === 'string' ? b.fechaAsignada : '';
+      const f = fa.localeCompare(fb);
       if (f !== 0) return f;
-      return (a.hora || '').localeCompare(b.hora || '');
+      const ha = typeof a.hora === 'string' ? a.hora : '';
+      const hb = typeof b.hora === 'string' ? b.hora : '';
+      return ha.localeCompare(hb);
     })
     .slice(0, n);
 }
@@ -79,14 +84,19 @@ export async function getUltimosResultados(n = 6): Promise<Partido[]> {
       snap.forEach(d => {
         const data = d.data() as any;
         if (data.estatus === 'finalizado') {
-          all.push({ id: d.id, ...data, categoria: cat.id });
+          const fecha = typeof data.fechaAsignada === 'string' ? data.fechaAsignada : '';
+          all.push({ id: d.id, ...data, fechaAsignada: fecha, categoria: cat.id });
         }
       });
     } catch { /* col no existe */ }
   }
 
   return all
-    .sort((a, b) => (b.fechaAsignada || '').localeCompare(a.fechaAsignada || ''))
+    .sort((a, b) => {
+      const fa = typeof a.fechaAsignada === 'string' ? a.fechaAsignada : '';
+      const fb = typeof b.fechaAsignada === 'string' ? b.fechaAsignada : '';
+      return fb.localeCompare(fa);
+    })
     .slice(0, n);
 }
 
@@ -145,6 +155,15 @@ export async function getPartidosPorCategoria(cat: CategoriaId, max = 300): Prom
       orderBy('fechaAsignada', 'desc'),
       limit(max)
     ));
-    return snap.docs.map(d => ({ id: d.id, ...d.data(), categoria: cat } as Partido));
+    return snap.docs.map(d => {
+      const data = d.data() as any;
+      return {
+        id: d.id,
+        ...data,
+        // Normalizar fechaAsignada a string (por si vino como Timestamp)
+        fechaAsignada: typeof data.fechaAsignada === 'string' ? data.fechaAsignada : '',
+        categoria: cat,
+      } as Partido;
+    });
   } catch { return []; }
 }

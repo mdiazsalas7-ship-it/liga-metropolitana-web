@@ -16,7 +16,10 @@ type FilterType = 'TODOS' | 'A' | 'B' | 'PLAYOFFS' | 'PENDIENTES' | 'FINALIZADOS
 function agruparPorFecha(partidos: Partido[]): Map<string, Partido[]> {
   const map = new Map<string, Partido[]>();
   partidos.forEach(p => {
-    const k = p.fechaAsignada || 'sin-fecha';
+    // Garantizamos string: si viene Timestamp u otra cosa, la ignoramos
+    const k = typeof p.fechaAsignada === 'string' && p.fechaAsignada
+      ? p.fechaAsignada
+      : 'sin-fecha';
     if (!map.has(k)) map.set(k, []);
     map.get(k)!.push(p);
   });
@@ -25,7 +28,11 @@ function agruparPorFecha(partidos: Partido[]): Map<string, Partido[]> {
 
 function fechaHeader(iso: string): string {
   if (!iso || iso === 'sin-fecha') return 'Sin fecha';
-  const [y, m, d] = iso.split('-').map(Number);
+  if (typeof iso !== 'string') return 'Sin fecha';
+  const parts = iso.split('-');
+  if (parts.length < 3) return iso;
+  const [y, m, d] = parts.map(Number);
+  if (!y) return iso;
   const date = new Date(y, (m || 1) - 1, d || 1);
   const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   const dias  = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -95,7 +102,10 @@ export function CalendarioCliente({
       const bLive = b.enVivo === true && b.estatus !== 'finalizado';
       if (aLive && !bLive) return -1;
       if (!aLive && bLive) return 1;
-      return (b.fechaAsignada || '').localeCompare(a.fechaAsignada || '');
+      // Coerción a string para evitar errores si fechaAsignada viene como Timestamp
+      const fa = typeof a.fechaAsignada === 'string' ? a.fechaAsignada : '';
+      const fb = typeof b.fechaAsignada === 'string' ? b.fechaAsignada : '';
+      return fb.localeCompare(fa);
     });
   }, [filtered]);
 
