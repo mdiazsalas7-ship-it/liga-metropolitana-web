@@ -9,6 +9,7 @@ import {
 } from '@/lib/queries';
 import { TeamLogo } from '@/components/TeamLogo';
 import { MatchCard } from '@/components/MatchCard';
+import { RosterClient } from '@/components/RosterClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -108,25 +109,12 @@ export default async function EquipoPage({
           <h2 className="text-xs font-bold tracking-widest text-[var(--color-text-dim)] uppercase mb-3">
             Roster
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {jugadores.map(j => (
-              <Link key={j.id} href={`/jugador/${j.id}?categoria=${c.id}`}
-                className="rounded-lg border border-[var(--color-border)] bg-white shadow-card hover:bg-[var(--color-bg)] transition-colors px-3.5 py-2.5 flex items-center gap-3">
-                <TeamLogo nombre={j.nombre} logoUrl={j.fotoUrl} size={36} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold truncate">
-                    <span className="text-liga-coral mr-1.5">#{j.numero}</span>
-                    {j.nombre}
-                  </p>
-                  {(j.puntos ?? 0) > 0 && (
-                    <p className="text-[10px] text-[var(--color-text-dim)] mt-0.5">
-                      {j.puntos} pts · {j.partidosJugados ?? 0} PJ
-                    </p>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
+          <RosterClient
+            jugadores={jugadores}
+            categoriaId={c.id}
+            equipoNombre={eq.nombre}
+            equipoLogoUrl={eq.logoUrl}
+          />
         </section>
       )}
 
