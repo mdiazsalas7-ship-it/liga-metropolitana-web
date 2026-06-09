@@ -167,3 +167,90 @@ export async function getPartidosPorCategoria(cat: CategoriaId, max = 300): Prom
     });
   } catch { return []; }
 }
+
+/** Partido individual por ID + categoría. */
+export async function getPartidoById(cat: CategoriaId, id: string): Promise<Partido | null> {
+  const db = getDb();
+  try {
+    const { doc, getDoc } = await import('firebase/firestore');
+    const ref = doc(db, colName('calendario', cat), id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    const data = snap.data() as any;
+    return {
+      id: snap.id,
+      ...data,
+      fechaAsignada: typeof data.fechaAsignada === 'string' ? data.fechaAsignada : '',
+      categoria: cat,
+    } as Partido;
+  } catch { return null; }
+}
+
+/** Stats por jugador de un partido. */
+export interface StatPartido {
+  jugadorId: string;
+  nombre?: string;
+  numero?: number | string;
+  equipo: 'local' | 'visitante';
+  dobles: number;
+  triples: number;
+  tirosLibres: number;
+  rebotes: number;
+  robos: number;
+  bloqueos: number;
+}
+
+export async function getStatsDePartido(partidoId: string): Promise<StatPartido[]> {
+  const db = getDb();
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'stats_partido'),
+      where('partidoId', '==', partidoId)
+    ));
+    return snap.docs.map(d => {
+      const data = d.data() as any;
+      return {
+        jugadorId:   data.jugadorId,
+        nombre:      data.nombre,
+        numero:      data.numero,
+        equipo:      data.equipo,
+        dobles:      data.dobles      || 0,
+        triples:     data.triples     || 0,
+        tirosLibres: data.tirosLibres || 0,
+        rebotes:     data.rebotes     || 0,
+        robos:       data.robos       || 0,
+        bloqueos:    data.bloqueos    || 0,
+      };
+    });
+  } catch { return []; }
+}
+
+/** Jugadas (play-by-play) de un partido, orden cronológico DESC. */
+export interface JugadaPartido {
+  id: string;
+  partidoId: string;
+  jugadorId: string;
+  jugadorNombre?: string;
+  jugadorNumero?: string | number;
+  equipo: 'local' | 'visitante';
+  accion: string;
+  puntos: number;
+  cuarto?: string;
+  timestamp?: any;
+  jugadorSaleId?: string;
+  jugadorSaleNombre?: string;
+  jugadorSaleNumero?: string | number;
+}
+
+export async function getJugadasDePartido(partidoId: string, max = 300): Promise<JugadaPartido[]> {
+  const db = getDb();
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'jugadas_partido'),
+      where('partidoId', '==', partidoId),
+      orderBy('timestamp', 'desc'),
+      limit(max)
+    ));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as JugadaPartido));
+  } catch { return []; }
+}
