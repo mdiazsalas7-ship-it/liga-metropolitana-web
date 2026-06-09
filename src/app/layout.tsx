@@ -1,21 +1,31 @@
 import type { Metadata } from 'next';
+import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { SITE_URL, SITE_NAME, SITE_DESC } from '@/lib/site';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Liga Metropolitana Eje Este',
-    template: '%s — Liga Metropolitana Eje Este',
+    default: SITE_NAME,
+    template: `%s — ${SITE_NAME}`,
   },
-  description:
-    'Resultados, calendario, estadísticas y noticias de la Liga Metropolitana Eje Este. Sigue todos los partidos en vivo.',
+  description: SITE_DESC,
   openGraph: {
-    title: 'Liga Metropolitana Eje Este',
-    description: 'Resultados, calendario, estadísticas y noticias en vivo.',
+    title: SITE_NAME,
+    description: SITE_DESC,
     type: 'website',
     locale: 'es',
+    siteName: SITE_NAME,
+    url: SITE_URL,
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_NAME,
+    description: SITE_DESC,
+  },
+  icons: { icon: '/favicon.svg' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
         <SiteFooter />
+        <Analytics />
       </body>
     </html>
   );

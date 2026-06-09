@@ -36,7 +36,9 @@ export function SiteHeader() {
         </nav>
 
         <a
-          href="#"
+          href="https://estadisticasavanzadas.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
           className="hidden sm:inline-flex items-center gap-2 rounded-full bg-liga-orange/15 border border-liga-orange/40 text-liga-orange px-3 py-1.5 text-xs font-bold hover:bg-liga-orange/25 transition-colors"
         >
           Descargar app

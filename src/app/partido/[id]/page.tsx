@@ -12,6 +12,8 @@ import {
   getPartidoById, getStatsDePartido, getJugadasDePartido, getEquipos,
 } from '@/lib/queries';
 import { PartidoView } from '@/components/PartidoView';
+import { ShareButton } from '@/components/ShareButton';
+import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 30;
@@ -74,18 +76,28 @@ export default async function PartidoPage({
   // Después del notFound, partido existe (notFound throws).
   const p = partido!;
 
+  const shareTitle = `${p.equipoLocalNombre} ${p.marcadorLocal ?? 0} - ${p.marcadorVisitante ?? 0} ${p.equipoVisitanteNombre}`;
+  const shareUrl   = `${SITE_URL}/partido/${p.id}?categoria=${c.id}`;
+
   return (
     <div className="space-y-6">
-      {/* Breadcrumb */}
-      <p className="text-xs text-[var(--color-text-dim2)]">
-        <Link href="/" className="hover:text-[var(--color-text-dim)]">Inicio</Link>
-        <span className="mx-1.5">›</span>
-        <Link href={`/calendario/${c.id}`} className="hover:text-[var(--color-text-dim)]">{c.label}</Link>
-        <span className="mx-1.5">›</span>
-        <span className="text-[var(--color-text-dim)] truncate">
-          {p.equipoLocalNombre} vs {p.equipoVisitanteNombre}
-        </span>
-      </p>
+      {/* Breadcrumb + compartir */}
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs text-[var(--color-text-dim2)] min-w-0">
+          <Link href="/" className="hover:text-[var(--color-text-dim)]">Inicio</Link>
+          <span className="mx-1.5">›</span>
+          <Link href={`/calendario/${c.id}`} className="hover:text-[var(--color-text-dim)]">{c.label}</Link>
+          <span className="mx-1.5">›</span>
+          <span className="text-[var(--color-text-dim)]">
+            vs
+          </span>
+        </p>
+        <ShareButton
+          title={shareTitle}
+          text={`${shareTitle} · ${c.label}`}
+          url={shareUrl}
+        />
+      </div>
 
       <PartidoView
         partidoInicial={p}
