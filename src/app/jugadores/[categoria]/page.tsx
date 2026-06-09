@@ -67,18 +67,18 @@ export default async function JugadoresPorCategoriaPage({ params }: { params: { 
       </p>
 
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold">Líderes · <span className="text-liga-orange">{c.label}</span></h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold">Líderes · <span className="text-liga-coral">{c.label}</span></h1>
         <p className="text-sm text-[var(--color-text-dim)] mt-1">{jugadores.length} jugadores registrados</p>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-white/10 pb-3">
+      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-[var(--color-border)] pb-3">
         {CATEGORIAS.map(x => (
           <Link key={x.id} href={`/jugadores/${x.id}`}
             className={
               'whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ' +
               (x.id === c.id
-                ? 'bg-liga-navy/60 border border-liga-navy text-white'
-                : 'bg-white/[0.04] border border-white/10 text-[var(--color-text-dim)] hover:bg-white/[0.08]')
+                ? 'bg-liga-dark border border-liga-dark text-white'
+                : 'bg-white border border-[var(--color-border)] text-[var(--color-text-dim)] hover:bg-[var(--color-bg)]')
             }>
             {x.label}
           </Link>
@@ -94,15 +94,15 @@ export default async function JugadoresPorCategoriaPage({ params }: { params: { 
             <h2 className="text-xs font-bold tracking-widest text-[var(--color-text-dim)] uppercase mb-3">
               {cfg.label}
             </h2>
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] divide-y divide-white/5">
+            <div className="rounded-xl border border-[var(--color-border)] bg-white shadow-card divide-y divide-[var(--color-border)]">
               {rank.map((r, i) => (
                 <Link key={r.jugador.id} href={`/jugador/${r.jugador.id}?categoria=${c.id}`}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.03] transition-colors">
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-bg)] transition-colors">
                   <span className="text-xs font-bold text-[var(--color-text-dim2)] w-5 tabular-nums">{i + 1}.</span>
                   <TeamLogo nombre={r.jugador.nombre} logoUrl={r.jugador.fotoUrl} size={36} />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold truncate">
-                      <span className="text-liga-orange mr-1.5">#{r.jugador.numero}</span>
+                      <span className="text-liga-coral mr-1.5">#{r.jugador.numero}</span>
                       {r.jugador.nombre}
                     </p>
                     <p className="text-[11px] text-[var(--color-text-dim)] truncate">{r.jugador.equipoNombre}</p>
@@ -121,7 +121,7 @@ export default async function JugadoresPorCategoriaPage({ params }: { params: { 
       })}
 
       {jugadores.length === 0 && (
-        <div className="text-center py-12 rounded-xl border border-white/10 bg-white/[0.02]">
+        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-white shadow-card">
           <p className="text-sm text-[var(--color-text-dim)]">Sin jugadores registrados aún.</p>
         </div>
       )}

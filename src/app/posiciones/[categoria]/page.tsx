@@ -106,20 +106,20 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
       </p>
 
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold">Posiciones · <span className="text-liga-orange">{c.label}</span></h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold">Posiciones · <span className="text-liga-coral">{c.label}</span></h1>
         <p className="text-sm text-[var(--color-text-dim)] mt-1">
           Sistema FIBA: 2 pts por victoria · 1 pt por derrota · 0 por forfait
         </p>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-white/10 pb-3">
+      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-[var(--color-border)] pb-3">
         {CATEGORIAS.map(x => (
           <Link key={x.id} href={`/posiciones/${x.id}`}
             className={
               'whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ' +
               (x.id === c.id
-                ? 'bg-liga-navy/60 border border-liga-navy text-white'
-                : 'bg-white/[0.04] border border-white/10 text-[var(--color-text-dim)] hover:bg-white/[0.08]')
+                ? 'bg-liga-dark border border-liga-dark text-white'
+                : 'bg-white border border-[var(--color-border)] text-[var(--color-text-dim)] hover:bg-[var(--color-bg)]')
             }>
             {x.label}
           </Link>
@@ -127,7 +127,7 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
       </div>
 
       {tabla.length === 0 ? (
-        <div className="text-center py-12 rounded-xl border border-white/10 bg-white/[0.02]">
+        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-white shadow-card">
           <p className="text-sm text-[var(--color-text-dim)]">Sin equipos cargados para {c.label}.</p>
         </div>
       ) : (
@@ -138,10 +138,10 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
                 Grupo {g}
               </h2>
             )}
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] overflow-x-auto">
+            <div className="rounded-xl border border-[var(--color-border)] bg-white shadow-card overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold border-b border-white/10">
+                  <tr className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold border-b border-[var(--color-border)]">
                     <th className="text-left py-2.5 px-3">#</th>
                     <th className="text-left py-2.5">Equipo</th>
                     <th className="py-2.5 px-2 text-center">PJ</th>
@@ -155,7 +155,7 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
                 </thead>
                 <tbody>
                   {porGrupo[g].map((r, i) => (
-                    <tr key={r.equipoId} className="border-b border-white/5 last:border-b-0 hover:bg-white/[0.03] transition-colors">
+                    <tr key={r.equipoId} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-bg)] transition-colors">
                       <td className="py-2.5 px-3 font-bold text-[var(--color-text-dim)] tabular-nums">{i + 1}</td>
                       <td className="py-2.5">
                         <Link href={`/equipo/${r.equipoId}?categoria=${c.id}`} className="flex items-center gap-2.5 min-w-0">

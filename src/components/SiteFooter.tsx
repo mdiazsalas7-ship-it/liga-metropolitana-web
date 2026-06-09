@@ -1,12 +1,12 @@
 export function SiteFooter() {
   return (
-    <footer className="border-t border-white/10 bg-[var(--color-bg)] mt-10">
-      <div className="mx-auto max-w-6xl px-4 py-6 flex flex-col sm:flex-row justify-between gap-2 text-xs text-[var(--color-text-dim2)]">
-        <span>© {new Date().getFullYear()} Liga Metropolitana Eje Este</span>
-        <span>
+    <footer className="border-t border-[var(--color-border)] bg-white mt-12">
+      <div className="mx-auto max-w-6xl px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[var(--color-text-dim)]">
+        <p>© 2026 Liga Metropolitana Eje Este</p>
+        <p>
           Powered by{' '}
-          <span className="text-[var(--color-text-dim)] font-semibold">El Comisionado</span>
-        </span>
+          <span className="text-liga-coral font-bold">El Comisionado</span>
+        </p>
       </div>
     </footer>
   );

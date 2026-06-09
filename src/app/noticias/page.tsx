@@ -30,13 +30,13 @@ export default async function NoticiasPage() {
       </div>
 
       {noticias.length === 0 ? (
-        <div className="text-center py-12 rounded-xl border border-white/10 bg-white/[0.02]">
+        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-white shadow-card">
           <p className="text-sm text-[var(--color-text-dim)]">Sin noticias publicadas todavía.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {noticias.map(n => (
-            <article key={n.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+            <article key={n.id} className="rounded-xl border border-[var(--color-border)] bg-white shadow-card p-5">
               {n.fecha && (
                 <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] mb-2 font-bold">
                   {fechaRelativa(n.fecha)}

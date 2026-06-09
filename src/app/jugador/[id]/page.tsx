@@ -65,12 +65,12 @@ export default async function JugadorPage({
       </p>
 
       {/* Header */}
-      <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
+      <section className="rounded-2xl border border-[var(--color-border)] bg-white shadow-card p-5 sm:p-6">
         <div className="flex items-start gap-4">
           <div className="relative flex-shrink-0">
             <TeamLogo nombre={j.nombre} logoUrl={j.fotoUrl} size={88} />
             {j.numero != null && (
-              <div className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-liga-orange border-4 border-[var(--color-bg)] flex items-center justify-center text-xs font-extrabold text-white">
+              <div className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-liga-coral border-4 border-[var(--color-bg)] flex items-center justify-center text-xs font-extrabold text-white">
                 {j.numero}
               </div>
             )}
@@ -79,7 +79,7 @@ export default async function JugadorPage({
             <h1 className="text-xl sm:text-3xl font-extrabold leading-tight">{j.nombre}</h1>
             <p className="text-xs text-[var(--color-text-dim)] mt-1.5">
               {eq && (
-                <Link href={`/equipo/${eq.id}?categoria=${c.id}`} className="hover:text-liga-orange transition-colors">
+                <Link href={`/equipo/${eq.id}?categoria=${c.id}`} className="hover:text-liga-coral transition-colors">
                   {j.equipoNombre}
                 </Link>
               )}
@@ -100,7 +100,7 @@ export default async function JugadorPage({
               { label: '3PP', val: (j.triples ?? 0) / pj, color: 'text-purple-400' },
               { label: 'PJ',  val: pj,                   color: 'text-white', isInt: true },
             ].map(s => (
-              <div key={s.label} className="rounded-lg bg-white/[0.04] p-3">
+              <div key={s.label} className="rounded-lg bg-white p-3">
                 <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">{s.label}</p>
                 <p className={`text-2xl font-extrabold mt-1 tabular-nums ${s.color}`}>
                   {(s as any).isInt ? s.val : s.val.toFixed(1)}
@@ -121,7 +121,7 @@ export default async function JugadorPage({
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {stats.map(s => (
-            <div key={s.key} className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+            <div key={s.key} className="rounded-lg border border-[var(--color-border)] bg-white shadow-card p-3">
               <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">{s.label}</p>
               <p className={`text-xl font-extrabold mt-1 tabular-nums ${s.color}`}>{s.value}</p>
             </div>

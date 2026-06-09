@@ -75,7 +75,7 @@ export default async function EquipoPage({
       </p>
 
       {/* Header con logo, nombre, récord */}
-      <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
+      <section className="rounded-2xl border border-[var(--color-border)] bg-white shadow-card p-5 sm:p-6">
         <div className="flex items-center gap-4">
           <TeamLogo nombre={eq.nombre} logoUrl={eq.logoUrl} size={80} />
           <div className="min-w-0 flex-1">
@@ -87,15 +87,15 @@ export default async function EquipoPage({
         </div>
 
         <div className="grid grid-cols-3 gap-3 mt-5">
-          <div className="rounded-lg bg-white/[0.04] p-3">
+          <div className="rounded-lg bg-white p-3">
             <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Ganados</p>
             <p className="text-2xl font-extrabold text-emerald-500 mt-1 tabular-nums">{ganados}</p>
           </div>
-          <div className="rounded-lg bg-white/[0.04] p-3">
+          <div className="rounded-lg bg-white p-3">
             <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Perdidos</p>
             <p className="text-2xl font-extrabold text-red-400 mt-1 tabular-nums">{perdidos}</p>
           </div>
-          <div className="rounded-lg bg-white/[0.04] p-3">
+          <div className="rounded-lg bg-white p-3">
             <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Plantel</p>
             <p className="text-2xl font-extrabold text-white mt-1 tabular-nums">{jugadores.length}</p>
           </div>
@@ -111,11 +111,11 @@ export default async function EquipoPage({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {jugadores.map(j => (
               <Link key={j.id} href={`/jugador/${j.id}?categoria=${c.id}`}
-                className="rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] transition-colors px-3.5 py-2.5 flex items-center gap-3">
+                className="rounded-lg border border-[var(--color-border)] bg-white shadow-card hover:bg-[var(--color-bg)] transition-colors px-3.5 py-2.5 flex items-center gap-3">
                 <TeamLogo nombre={j.nombre} logoUrl={j.fotoUrl} size={36} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold truncate">
-                    <span className="text-liga-orange mr-1.5">#{j.numero}</span>
+                    <span className="text-liga-coral mr-1.5">#{j.numero}</span>
                     {j.nombre}
                   </p>
                   {(j.puntos ?? 0) > 0 && (

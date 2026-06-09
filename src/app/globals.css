@@ -3,34 +3,70 @@
 @tailwind utilities;
 
 :root {
-  --color-bg:        #020c1b;
-  --color-bg-alt:    #0d1f4a;
-  --color-card:      #0a1428;
-  --color-border:    rgba(255,255,255,0.08);
-  --color-text:      #e2e8f0;
-  --color-text-dim:  #94a3b8;
-  --color-text-dim2: #64748b;
-  --color-accent:    #f97316;
-  --color-live:      #ef4444;
-  --color-final:     #10b981;
-  --color-gold:      #fbbf24;
+  /* Fondos */
+  --color-bg:        #f4f4f5;   /* gris muy claro de página */
+  --color-bg-alt:    #ffffff;   /* superficies y cards */
+  --color-card:      #ffffff;
+  --color-dark:      #18181b;   /* header tipo ESPN */
+  --color-dark-soft: #27272a;
+
+  /* Bordes */
+  --color-border:        rgba(0,0,0,0.08);
+  --color-border-strong: rgba(0,0,0,0.14);
+
+  /* Texto */
+  --color-text:      #0f172a;   /* casi negro */
+  --color-text-dim:  #475569;   /* secundario */
+  --color-text-dim2: #94a3b8;   /* terciario */
+
+  /* Acentos de marca */
+  --color-accent:      #D85A30;   /* coral tipo ESPN */
+  --color-accent-soft: #FAECE7;
+  --color-accent-dark: #993C1D;
+
+  --color-navy:        #0d1f4a;   /* navy de la liga (para algún detalle) */
+
+  /* Estados */
+  --color-live:      #dc2626;
+  --color-live-soft: #fef2f2;
+  --color-final:     #059669;
+  --color-final-soft:#ecfdf5;
+  --color-gold:      #d97706;
+  --color-gold-soft: #fef3c7;
 }
 
 html, body {
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a { color: inherit; text-decoration: none; }
 * { box-sizing: border-box; }
 
+/* Util: ocultar scrollbar pero permitir scroll */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Pulsing dot rojo */
 @keyframes pulse-live {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.4; }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.92); }
 }
-.pulse-live { animation: pulse-live 1.5s ease-in-out infinite; }
+.pulse-live { animation: pulse-live 1.4s ease-in-out infinite; }
+
+/* Card hover suave (las cards tienen sombra; al hover se levantan un poquito) */
+.card-hover {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+  border-color: var(--color-border-strong);
+}
+
+/* Sombras consistentes */
+.shadow-card { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03); }
+.shadow-hero { box-shadow: 0 10px 30px rgba(216, 90, 48, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06); }

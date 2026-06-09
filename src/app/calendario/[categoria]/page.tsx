@@ -45,14 +45,14 @@ export default async function CalendarioCategoriaPage({ params }: { params: { ca
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold">Calendario · <span className="text-liga-orange">{c.label}</span></h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold">Calendario · <span className="text-liga-coral">{c.label}</span></h1>
         <p className="text-sm text-[var(--color-text-dim)] mt-1">
           {partidos.length} {partidos.length === 1 ? 'partido' : 'partidos'} en la temporada
         </p>
       </div>
 
       {/* Selector de categoría (tabs entre todas) */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-white/10 pb-3">
+      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-[var(--color-border)] pb-3">
         {CATEGORIAS.map(x => (
           <Link
             key={x.id}
@@ -60,8 +60,8 @@ export default async function CalendarioCategoriaPage({ params }: { params: { ca
             className={
               'whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ' +
               (x.id === c.id
-                ? 'bg-liga-navy/60 border border-liga-navy text-white'
-                : 'bg-white/[0.04] border border-white/10 text-[var(--color-text-dim)] hover:bg-white/[0.08]')
+                ? 'bg-liga-dark border border-liga-dark text-white'
+                : 'bg-white border border-[var(--color-border)] text-[var(--color-text-dim)] hover:bg-[var(--color-bg)]')
             }
           >
             {x.label}
@@ -71,7 +71,7 @@ export default async function CalendarioCategoriaPage({ params }: { params: { ca
 
       {/* Listado con filtros / búsqueda (cliente) */}
       {partidos.length === 0 ? (
-        <div className="text-center py-12 rounded-xl border border-white/10 bg-white/[0.02]">
+        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-white shadow-card">
           <p className="text-sm text-[var(--color-text-dim)]">
             Aún no hay partidos cargados para {c.label}.
           </p>

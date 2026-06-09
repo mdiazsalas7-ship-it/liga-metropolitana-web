@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { APP_URL } from '@/lib/site';
 
 const NAV = [
   { href: '/',           label: 'Inicio' },
@@ -11,48 +12,42 @@ const NAV = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[var(--color-bg)]/80 backdrop-blur">
+    <header className="bg-liga-dark text-white sticky top-0 z-30 shadow-md">
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-liga-navy text-white flex items-center justify-center font-bold text-sm">
+        {/* Logo + branding */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-11 h-11 rounded-md bg-liga-coral flex items-center justify-center font-extrabold text-white text-base group-hover:scale-105 transition-transform">
             LM
           </div>
-          <div className="leading-tight">
-            <p className="text-sm font-bold">Liga Metropolitana</p>
-            <p className="text-[11px] text-[var(--color-text-dim)]">Eje Este · 2026</p>
+          <div className="hidden sm:flex flex-col leading-tight">
+            <span className="font-bold text-sm">Liga Metropolitana</span>
+            <span className="text-[11px] text-zinc-400">Eje Este · 2026</span>
           </div>
         </Link>
 
-        <nav className="hidden sm:flex items-center gap-5 text-sm">
-          {NAV.map(n => (
+        {/* Nav */}
+        <nav className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm overflow-x-auto no-scrollbar -mx-2 px-2">
+          {NAV.map(item => (
             <Link
-              key={n.href}
-              href={n.href}
-              className="text-[var(--color-text-dim)] hover:text-white transition-colors"
+              key={item.href}
+              href={item.href}
+              className="whitespace-nowrap px-2.5 sm:px-3 py-2 rounded-md text-zinc-300 hover:text-white hover:bg-white/10 font-semibold transition-colors"
             >
-              {n.label}
+              {item.label}
             </Link>
           ))}
         </nav>
 
+        {/* CTA */}
         <a
-          href="https://estadisticasavanzadas.vercel.app/"
+          href={APP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="hidden sm:inline-flex items-center gap-2 rounded-full bg-liga-orange/15 border border-liga-orange/40 text-liga-orange px-3 py-1.5 text-xs font-bold hover:bg-liga-orange/25 transition-colors"
+          className="hidden md:inline-flex items-center gap-1.5 rounded-md bg-liga-coral hover:bg-liga-coralDark text-white px-3.5 py-2 text-xs font-bold transition-colors"
         >
-          Descargar app
+          📱 Descargar app
         </a>
       </div>
-
-      {/* Nav móvil simple */}
-      <nav className="sm:hidden flex gap-4 px-4 pb-2 overflow-x-auto no-scrollbar text-xs">
-        {NAV.map(n => (
-          <Link key={n.href} href={n.href} className="text-[var(--color-text-dim)] whitespace-nowrap">
-            {n.label}
-          </Link>
-        ))}
-      </nav>
     </header>
   );
 }

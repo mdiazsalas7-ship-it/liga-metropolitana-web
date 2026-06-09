@@ -30,10 +30,10 @@ export default function CalendarioLandingPage() {
           <Link
             key={c.id}
             href={`/calendario/${c.id}`}
-            className="rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-liga-orange/40 transition-colors p-5"
+            className="rounded-xl border border-[var(--color-border)] bg-white shadow-card hover:bg-[var(--color-bg)] hover:border-liga-coral/40 transition-colors p-5"
           >
             <p className="font-bold text-base">{c.label}</p>
-            <p className="text-xs text-liga-orange mt-2">Ver partidos →</p>
+            <p className="text-xs text-liga-coral mt-2">Ver partidos →</p>
           </Link>
         ))}
       </div>

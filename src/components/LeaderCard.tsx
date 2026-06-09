@@ -1,12 +1,12 @@
 import { TeamLogo } from './TeamLogo';
 import type { Lider } from '@/lib/queries';
 
-const STAT_LABELS: Record<string, { label: string; unit: string; color: string }> = {
-  puntos:       { label: 'Goleador',    unit: 'PPP',  color: 'text-liga-gold' },
-  rebotes:      { label: 'Rebotes',     unit: 'RPP',  color: 'text-emerald-500' },
-  robos:        { label: 'Robos',       unit: 'por partido', color: 'text-blue-400' },
-  triples:      { label: 'Triples',     unit: 'por partido', color: 'text-purple-400' },
-  bloqueos:     { label: 'Bloqueos',    unit: 'por partido', color: 'text-red-400' },
+const STAT_LABELS: Record<string, { label: string; unit: string; bg: string; fg: string }> = {
+  puntos:    { label: 'Goleador', unit: 'puntos por partido', bg: 'bg-liga-coralSoft',  fg: 'text-liga-coral' },
+  rebotes:   { label: 'Rebotes',  unit: 'rebotes por partido', bg: 'bg-emerald-50',    fg: 'text-emerald-700' },
+  robos:     { label: 'Robos',    unit: 'robos por partido',   bg: 'bg-blue-50',       fg: 'text-blue-700' },
+  triples:   { label: 'Triples',  unit: 'triples por partido', bg: 'bg-purple-50',     fg: 'text-purple-700' },
+  bloqueos:  { label: 'Bloqueos', unit: 'bloqueos por partido', bg: 'bg-red-50',       fg: 'text-red-700' },
 };
 
 export function LeaderCard({
@@ -22,25 +22,33 @@ export function LeaderCard({
   const j = lider.jugador;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
-      <div className="flex items-center gap-3 mb-3">
-        <TeamLogo nombre={j.nombre} logoUrl={j.fotoUrl} size={44} />
-        <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim)] font-bold">
-            {cfg.label}
-          </p>
-          <p className="text-sm font-bold truncate">{j.nombre}</p>
-          <p className="text-[10px] text-[var(--color-text-dim2)] truncate">{j.equipoNombre} · {categoria}</p>
-        </div>
+    <div className="bg-white border border-[var(--color-border)] rounded-xl shadow-card card-hover p-5 flex flex-col items-center text-center">
+      {/* Tag arriba */}
+      <span className={`inline-block ${cfg.bg} ${cfg.fg} text-[10px] font-extrabold tracking-widest uppercase px-2.5 py-1 rounded-full mb-3`}>
+        {cfg.label}
+      </span>
+
+      {/* Avatar grande */}
+      <div className="relative mb-3">
+        <TeamLogo nombre={j.nombre} logoUrl={j.fotoUrl} size={72} ring />
+        {j.numero != null && (
+          <span className="absolute -bottom-1 -right-1 bg-liga-dark text-white rounded-full w-7 h-7 flex items-center justify-center text-[10px] font-extrabold border-2 border-white">
+            {j.numero}
+          </span>
+        )}
       </div>
-      <div className="flex items-baseline gap-1.5">
-        <span className={'text-2xl font-extrabold tabular-nums ' + cfg.color}>
-          {lider.promedio.toFixed(1)}
-        </span>
-        <span className="text-[10px] text-[var(--color-text-dim2)] font-bold uppercase tracking-wider">
-          {cfg.unit}
-        </span>
-      </div>
+
+      {/* Nombre */}
+      <p className="text-sm font-extrabold text-[var(--color-text)] leading-tight">{j.nombre}</p>
+      <p className="text-[11px] text-[var(--color-text-dim)] mt-0.5">{j.equipoNombre} · {categoria}</p>
+
+      {/* Stat grande */}
+      <p className={`text-4xl font-extrabold mt-3 tabular-nums ${cfg.fg} leading-none`}>
+        {lider.promedio.toFixed(1)}
+      </p>
+      <p className="text-[10px] text-[var(--color-text-dim2)] mt-1 uppercase tracking-wider font-bold">
+        {cfg.unit}
+      </p>
     </div>
   );
 }
