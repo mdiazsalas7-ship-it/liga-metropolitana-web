@@ -1,13 +1,19 @@
+// Home tipo NBA.com: GamesStrip arriba, hero con noticia destacada + EN VIVO,
+// sidebar de HEADLINES + líderes, "Alrededor de la liga" abajo.
+
 import Link from 'next/link';
 import { CATEGORIAS } from '@/lib/categorias';
 import {
   getPartidoEnVivo, getProximosPartidos, getUltimosResultados,
-  getLideres, getEquipos, getNoticias,
+  getLideres, getEquipos, getNoticias, getPartidosParaStrip,
 } from '@/lib/queries';
+import { GamesStrip } from '@/components/GamesStrip';
+import { FeaturedStory } from '@/components/FeaturedStory';
+import { HeadlinesSidebar } from '@/components/HeadlinesSidebar';
+import { AroundLeagueList } from '@/components/AroundLeagueList';
 import { LiveScoreCard } from '@/components/LiveScoreCard';
 import { MatchCard } from '@/components/MatchCard';
 import { LeaderCard } from '@/components/LeaderCard';
-import { fechaRelativa } from '@/lib/fechas';
 
 export const revalidate = 60;
 
@@ -30,16 +36,19 @@ function SectionHeader({ title, sub, link, linkLabel = 'Ver todos →' }: {
 }
 
 export default async function HomePage() {
-  const [enVivo, proximos, resultados, noticias] = await Promise.all([
+  const [
+    enVivo, proximos, resultados, noticias, partidosStrip,
+  ] = await Promise.all([
     getPartidoEnVivo(),
     getProximosPartidos(6),
-    getUltimosResultados(4),
-    getNoticias(3),
+    getUltimosResultados(6),
+    getNoticias(12), // más noticias para el rediseño
+    getPartidosParaStrip(),
   ]);
 
   // Equipos por categorías visibles para mostrar logos
   const catsUsadas = new Set<string>();
-  [...proximos, ...resultados].forEach(p => p.categoria && catsUsadas.add(p.categoria));
+  [...proximos, ...resultados, ...partidosStrip].forEach(p => p.categoria && catsUsadas.add(p.categoria));
   const equiposPorCat = new Map<string, Awaited<ReturnType<typeof getEquipos>>>();
   await Promise.all(
     Array.from(catsUsadas).map(async cat => {
@@ -49,7 +58,7 @@ export default async function HomePage() {
   const equiposAll = new Map();
   equiposPorCat.forEach(m => m.forEach((v, k) => equiposAll.set(k, v)));
 
-  // Top goleadores (primera categoría con datos)
+  // Top goleadores
   let lideresPuntos: Awaited<ReturnType<typeof getLideres>> = [];
   let categoriaLider = '';
   for (const cat of CATEGORIAS) {
@@ -57,114 +66,120 @@ export default async function HomePage() {
     if (res.length > 0) { lideresPuntos = res; categoriaLider = cat.label; break; }
   }
 
+  // Noticia destacada = la más reciente con imagen, o la primera si ninguna tiene
+  const featured = noticias.find(n => !!n.imagenUrl) ?? noticias[0];
+  const headlinesNews = noticias.filter(n => !featured || n.id !== featured.id);
+
   return (
-    <div className="space-y-10">
-      {/* PARTIDO EN VIVO (si hay) — siempre arriba */}
-      {enVivo && (
-        <LiveScoreCard
-          partidoIdInicial={enVivo.id}
-          categoriaInicial={enVivo.categoria}
-          partidoInicial={enVivo}
-        />
-      )}
-
-      {/* HERO si NO hay en vivo */}
-      {!enVivo && (
-        <section className="rounded-2xl bg-gradient-to-br from-liga-dark to-liga-darkSoft text-white p-7 sm:p-10 shadow-card">
-          <span className="inline-block rounded-full bg-liga-coral text-white text-[11px] font-extrabold tracking-widest px-3 py-1 uppercase">
-            Temporada 2026
-          </span>
-          <h1 className="mt-4 text-3xl sm:text-5xl font-extrabold leading-none tracking-tight">
-            Liga Metropolitana
-            <span className="block text-liga-coral mt-1">Eje Este</span>
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-zinc-300 max-w-xl">
-            Resultados en vivo, calendario, estadísticas y noticias de todas las categorías. Sigue cada partido jugada por jugada.
-          </p>
-        </section>
-      )}
-
-      {/* PRÓXIMOS PARTIDOS */}
-      {proximos.length > 0 && (
-        <section>
-          <SectionHeader title="Esta semana" sub="Próximos partidos" link="/calendario" linkLabel="Ver calendario →" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {proximos.map(p => (
-              <MatchCard key={p.id} partido={p} equipos={equiposAll} variant="proximo" />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* RESULTADOS */}
-      {resultados.length > 0 && (
-        <section>
-          <SectionHeader title="Resultados recientes" link="/calendario" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {resultados.map(p => (
-              <MatchCard key={p.id} partido={p} equipos={equiposAll} variant="resultado" />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* LÍDERES */}
-      {lideresPuntos.length > 0 && (
-        <section>
-          <SectionHeader
-            title="Líderes goleadores"
-            sub={`${categoriaLider} · Temporada 2026`}
-            link="/jugadores"
-            linkLabel="Ver stats →"
-          />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {lideresPuntos.map(l => (
-              <LeaderCard key={l.jugador.id} stat="puntos" lider={l} categoria={categoriaLider} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* NOTICIAS */}
-      {noticias.length > 0 && (
-        <section>
-          <SectionHeader title="Noticias" link="/noticias" linkLabel="Ver todas →" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {noticias.map(n => (
-              <article key={n.id} className="bg-white border border-[var(--color-border)] rounded-xl shadow-card p-5 card-hover">
-                {n.fecha && (
-                  <p className="text-[10px] uppercase tracking-wider text-liga-coral mb-2 font-extrabold">
-                    {fechaRelativa(n.fecha)}
-                  </p>
-                )}
-                <h3 className="text-base font-extrabold leading-snug mb-2 text-[var(--color-text)]">{n.titulo}</h3>
-                {n.contenido && (
-                  <p className="text-sm text-[var(--color-text-dim)] line-clamp-3 leading-relaxed">
-                    {n.contenido}
-                  </p>
-                )}
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* CATEGORÍAS */}
-      <section>
-        <SectionHeader title="Explorar por categoría" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {CATEGORIAS.map(c => (
-            <Link
-              key={c.id}
-              href={`/calendario/${c.id}`}
-              className="bg-white border border-[var(--color-border)] rounded-xl shadow-card card-hover px-4 py-5 text-center"
-            >
-              <p className="font-extrabold text-sm text-[var(--color-text)]">{c.label}</p>
-              <p className="text-[11px] text-liga-coral mt-1 font-bold">Ver partidos →</p>
-            </Link>
-          ))}
+    <>
+      {/* TOP STRIP fuera del max-width para que ocupe todo el ancho */}
+      {partidosStrip.length > 0 && (
+        <div className="-mx-4 -mt-6 mb-6">
+          <GamesStrip partidos={partidosStrip} equipos={equiposAll} />
         </div>
-      </section>
-    </div>
+      )}
+
+      <div className="space-y-10">
+        {/* HERO ROW: 2/3 noticia destacada + 1/3 sidebar headlines */}
+        {featured && (
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <FeaturedStory noticia={featured} />
+            </div>
+            <div>
+              <HeadlinesSidebar noticias={headlinesNews} />
+            </div>
+          </section>
+        )}
+
+        {/* Si NO hay noticias, hero alternativo */}
+        {!featured && (
+          <section className="rounded-2xl bg-gradient-to-br from-liga-dark to-liga-darkSoft text-white p-7 sm:p-10 shadow-card">
+            <span className="inline-block rounded-full bg-liga-coral text-white text-[11px] font-extrabold tracking-widest px-3 py-1 uppercase">
+              Temporada 2026
+            </span>
+            <h1 className="mt-4 text-3xl sm:text-5xl font-extrabold leading-none tracking-tight">
+              Liga Metropolitana
+              <span className="block text-liga-coral mt-1">Eje Este</span>
+            </h1>
+          </section>
+        )}
+
+        {/* PARTIDO EN VIVO si hay */}
+        {enVivo && (
+          <LiveScoreCard
+            partidoIdInicial={enVivo.id}
+            categoriaInicial={enVivo.categoria}
+            partidoInicial={enVivo}
+          />
+        )}
+
+        {/* PRÓXIMOS */}
+        {proximos.length > 0 && (
+          <section>
+            <SectionHeader title="Esta semana" sub="Próximos partidos" link="/calendario" linkLabel="Ver calendario →" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {proximos.map(p => (
+                <MatchCard key={p.id} partido={p} equipos={equiposAll} variant="proximo" />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* RESULTADOS */}
+        {resultados.length > 0 && (
+          <section>
+            <SectionHeader title="Resultados recientes" link="/calendario" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {resultados.map(p => (
+                <MatchCard key={p.id} partido={p} equipos={equiposAll} variant="resultado" />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* LÍDERES */}
+        {lideresPuntos.length > 0 && (
+          <section>
+            <SectionHeader
+              title="Líderes goleadores"
+              sub={`${categoriaLider} · Temporada 2026`}
+              link="/jugadores"
+              linkLabel="Ver stats →"
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {lideresPuntos.map(l => (
+                <LeaderCard key={l.jugador.id} stat="puntos" lider={l} categoria={categoriaLider} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ALREDEDOR DE LA LIGA */}
+        {noticias.length > 0 && (
+          <section>
+            <SectionHeader title="Alrededor de la liga" link="/noticias" linkLabel="Ver todas →" />
+            <AroundLeagueList noticias={noticias.slice(0, 8)} />
+          </section>
+        )}
+
+        {/* CATEGORÍAS */}
+        <section>
+          <SectionHeader title="Explorar por categoría" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {CATEGORIAS.map(c => (
+              <Link
+                key={c.id}
+                href={`/calendario/${c.id}`}
+                className="bg-white border border-[var(--color-border)] rounded-xl shadow-card card-hover px-4 py-5 text-center"
+              >
+                <p className="font-extrabold text-sm text-[var(--color-text)]">{c.label}</p>
+                <p className="text-[11px] text-liga-coral mt-1 font-bold">Ver partidos →</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </div>
+    </>
   );
 }

@@ -340,3 +340,32 @@ export async function getTodasNoticias(): Promise<Noticia[]> {
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as Noticia));
   } catch { return []; }
 }
+
+/** Para el strip de partidos del home: trae EN VIVO + próximos + recientes
+ *  de TODAS las categorías. Ordenado por relevancia (live primero, después fecha). */
+export async function getPartidosParaStrip(): Promise<Partido[]> {
+  const db = getDb();
+  const today = todayISO();
+  const all: Partido[] = [];
+
+  for (const cat of CATEGORIAS) {
+    try {
+      const snap = await getDocs(query(
+        collection(db, colName('calendario', cat.id)),
+        orderBy('fechaAsignada', 'desc'),
+        limit(40)
+      ));
+      snap.forEach(d => {
+        const data = d.data() as any;
+        const fecha = typeof data.fechaAsignada === 'string' ? data.fechaAsignada : '';
+        const isLive = data.enVivo === true && data.estatus !== 'finalizado';
+        const isFinal = data.estatus === 'finalizado';
+        const upcoming = data.estatus === 'programado' && fecha >= today;
+        if (isLive || isFinal || upcoming) {
+          all.push({ id: d.id, ...data, fechaAsignada: fecha, categoria: cat.id });
+        }
+      });
+    } catch { /* col no existe */ }
+  }
+  return all;
+}
