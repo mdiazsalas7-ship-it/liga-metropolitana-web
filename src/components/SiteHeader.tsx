@@ -1,8 +1,9 @@
 import Link from 'next/link';
 
 const NAV = [
-  { href: '/',          label: 'Inicio' },
+  { href: '/',           label: 'Inicio' },
   { href: '/calendario', label: 'Calendario' },
+  { href: '/posiciones', label: 'Tabla' },
   { href: '/equipos',    label: 'Equipos' },
   { href: '/jugadores',  label: 'Stats' },
   { href: '/noticias',   label: 'Noticias' },

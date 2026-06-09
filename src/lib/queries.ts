@@ -254,3 +254,89 @@ export async function getJugadasDePartido(partidoId: string, max = 300): Promise
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as JugadaPartido));
   } catch { return []; }
 }
+
+/** Equipo individual por ID + categoría (incluye roster). */
+export async function getEquipoById(cat: CategoriaId, equipoId: string): Promise<Equipo | null> {
+  const db = getDb();
+  try {
+    const { doc, getDoc } = await import('firebase/firestore');
+    const ref = doc(db, colName('equipos', cat), equipoId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    return { id: snap.id, ...snap.data() } as Equipo;
+  } catch { return null; }
+}
+
+/** Roster (jugadores) de un equipo. */
+export async function getJugadoresDeEquipo(cat: CategoriaId, equipoId: string): Promise<Jugador[]> {
+  const db = getDb();
+  try {
+    const snap = await getDocs(query(
+      collection(db, colName('jugadores', cat)),
+      where('equipoId', '==', equipoId)
+    ));
+    const arr = snap.docs.map(d => ({ id: d.id, ...d.data() } as Jugador));
+    return arr.sort((a, b) => (a.numero ?? 999) - (b.numero ?? 999));
+  } catch { return []; }
+}
+
+/** Jugador individual por ID + categoría. */
+export async function getJugadorById(cat: CategoriaId, jugadorId: string): Promise<Jugador | null> {
+  const db = getDb();
+  try {
+    const { doc, getDoc } = await import('firebase/firestore');
+    const ref = doc(db, colName('jugadores', cat), jugadorId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    return { id: snap.id, ...snap.data() } as Jugador;
+  } catch { return null; }
+}
+
+/** Stats por partido de un jugador específico. */
+export async function getStatsDeJugador(jugadorId: string): Promise<StatPartido[]> {
+  const db = getDb();
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'stats_partido'),
+      where('jugadorId', '==', jugadorId)
+    ));
+    return snap.docs.map(d => {
+      const data = d.data() as any;
+      return {
+        jugadorId:   data.jugadorId,
+        nombre:      data.nombre,
+        numero:      data.numero,
+        equipo:      data.equipo,
+        dobles:      data.dobles      || 0,
+        triples:     data.triples     || 0,
+        tirosLibres: data.tirosLibres || 0,
+        rebotes:     data.rebotes     || 0,
+        robos:       data.robos       || 0,
+        bloqueos:    data.bloqueos    || 0,
+        partidoId:   data.partidoId,
+      } as StatPartido & { partidoId: string };
+    });
+  } catch { return []; }
+}
+
+/** Todos los jugadores de una categoría (para listados de líderes). */
+export async function getJugadoresPorCategoria(cat: CategoriaId): Promise<Jugador[]> {
+  const db = getDb();
+  try {
+    const snap = await getDocs(collection(db, colName('jugadores', cat)));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Jugador));
+  } catch { return []; }
+}
+
+/** Todas las noticias (para la página listado). */
+export async function getTodasNoticias(): Promise<Noticia[]> {
+  const db = getDb();
+  try {
+    const snap = await getDocs(query(
+      collection(db, 'noticias'),
+      orderBy('fecha', 'desc'),
+      limit(50)
+    ));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Noticia));
+  } catch { return []; }
+}
