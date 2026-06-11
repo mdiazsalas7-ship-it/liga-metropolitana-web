@@ -192,12 +192,16 @@ export async function getPartidoById(cat: CategoriaId, id: string): Promise<Part
   } catch { return null; }
 }
 
-/** Stats por jugador de un partido. */
+/** Stats por jugador de un partido.
+ *  IMPORTANTE: `equipo` es el NOMBRE del equipo (ej. "ESPARTANOS"), no 'local'|'visitante'.
+ *  `equipoId` puede o no estar — comparamos primero por id y caemos al nombre. */
 export interface StatPartido {
   jugadorId: string;
   nombre?: string;
   numero?: number | string;
-  equipo: 'local' | 'visitante';
+  equipo?: string;        // nombre del equipo
+  equipoId?: string;      // id del equipo (puede no existir en datos viejos)
+  fotoUrl?: string;
   dobles: number;
   triples: number;
   tirosLibres: number;
@@ -220,6 +224,8 @@ export async function getStatsDePartido(partidoId: string): Promise<StatPartido[
         nombre:      data.nombre,
         numero:      data.numero,
         equipo:      data.equipo,
+        equipoId:    data.equipoId,
+        fotoUrl:     data.fotoUrl,
         dobles:      data.dobles      || 0,
         triples:     data.triples     || 0,
         tirosLibres: data.tirosLibres || 0,
@@ -299,7 +305,7 @@ export async function getJugadorById(cat: CategoriaId, jugadorId: string): Promi
 }
 
 /** Stats por partido de un jugador específico. */
-export async function getStatsDeJugador(jugadorId: string): Promise<StatPartido[]> {
+export async function getStatsDeJugador(jugadorId: string): Promise<(StatPartido & { partidoId: string })[]> {
   const db = getDb();
   try {
     const snap = await getDocs(query(
@@ -313,6 +319,8 @@ export async function getStatsDeJugador(jugadorId: string): Promise<StatPartido[
         nombre:      data.nombre,
         numero:      data.numero,
         equipo:      data.equipo,
+        equipoId:    data.equipoId,
+        fotoUrl:     data.fotoUrl,
         dobles:      data.dobles      || 0,
         triples:     data.triples     || 0,
         tirosLibres: data.tirosLibres || 0,
@@ -320,7 +328,7 @@ export async function getStatsDeJugador(jugadorId: string): Promise<StatPartido[
         robos:       data.robos       || 0,
         bloqueos:    data.bloqueos    || 0,
         partidoId:   data.partidoId,
-      } as StatPartido & { partidoId: string };
+      };
     });
   } catch { return []; }
 }

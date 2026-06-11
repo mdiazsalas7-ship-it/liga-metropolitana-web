@@ -1,5 +1,8 @@
 'use client';
 
+// Vista del partido. El filtrado de stats por equipo usa el NOMBRE o ID del equipo
+// (no 'local'/'visitante') porque así viene en Firestore.
+
 import { useEffect, useMemo, useState } from 'react';
 import { onSnapshot, doc, collection, query, where, orderBy, limit } from 'firebase/firestore';
 import { getDb } from '@/lib/firebase';
@@ -42,22 +45,29 @@ interface BoxRow {
   triples: number; dobles: number; tl: number;
 }
 
-function buildBoxScore(stats: StatPartido[], equipo: 'local' | 'visitante'): BoxRow[] {
-  return stats
-    .filter(s => s.equipo === equipo)
-    .map(s => ({
-      jugadorId: s.jugadorId,
-      nombre:    s.nombre || '',
-      numero:    s.numero ?? '',
-      pts:       s.tirosLibres + s.dobles * 2 + s.triples * 3,
-      reb:       s.rebotes,
-      rob:       s.robos,
-      blo:       s.bloqueos,
-      triples:   s.triples,
-      dobles:    s.dobles,
-      tl:        s.tirosLibres,
-    }))
-    .sort((a, b) => b.pts - a.pts);
+/** Filtra stats por equipo usando nombre o id (igual que la app vieja). */
+function statsDelEquipo(stats: StatPartido[], teamName?: string, teamId?: string): StatPartido[] {
+  const targetName = (teamName || '').trim().toUpperCase();
+  return stats.filter(s => {
+    if (teamId && s.equipoId && s.equipoId.toString() === teamId.toString()) return true;
+    if (targetName && s.equipo && s.equipo.trim().toUpperCase() === targetName) return true;
+    return false;
+  });
+}
+
+function buildBoxScore(stats: StatPartido[]): BoxRow[] {
+  return stats.map(s => ({
+    jugadorId: s.jugadorId,
+    nombre:    s.nombre || '',
+    numero:    s.numero ?? '',
+    pts:       (s.tirosLibres || 0) + (s.dobles || 0) * 2 + (s.triples || 0) * 3,
+    reb:       s.rebotes  || 0,
+    rob:       s.robos    || 0,
+    blo:       s.bloqueos || 0,
+    triples:   s.triples  || 0,
+    dobles:    s.dobles   || 0,
+    tl:        s.tirosLibres || 0,
+  })).sort((a, b) => b.pts - a.pts);
 }
 
 function totalsOf(rows: BoxRow[]) {
@@ -119,14 +129,24 @@ export function PartidoView({
     return () => unsub();
   }, [partidoInicial.id, isLive]);
 
-  const boxLocal    = useMemo(() => buildBoxScore(stats, 'local'),     [stats]);
-  const boxVisita   = useMemo(() => buildBoxScore(stats, 'visitante'), [stats]);
-  const totalsLocal = useMemo(() => totalsOf(boxLocal),   [boxLocal]);
-  const totalsVisit = useMemo(() => totalsOf(boxVisita),  [boxVisita]);
+  // Filtrado por NOMBRE/ID del equipo (no por 'local'/'visitante')
+  const statsLocal = useMemo(
+    () => statsDelEquipo(stats, partido.equipoLocalNombre, partido.equipoLocalId),
+    [stats, partido.equipoLocalNombre, partido.equipoLocalId]
+  );
+  const statsVisita = useMemo(
+    () => statsDelEquipo(stats, partido.equipoVisitanteNombre, partido.equipoVisitanteId),
+    [stats, partido.equipoVisitanteNombre, partido.equipoVisitanteId]
+  );
 
+  const boxLocal    = useMemo(() => buildBoxScore(statsLocal),  [statsLocal]);
+  const boxVisita   = useMemo(() => buildBoxScore(statsVisita), [statsVisita]);
+  const totalsLocal = useMemo(() => totalsOf(boxLocal),  [boxLocal]);
+  const totalsVisit = useMemo(() => totalsOf(boxVisita), [boxVisita]);
+
+  // Top performers: ahora calcula correctamente
   const topPerformers = useMemo(() => {
-    const all = [...boxLocal, ...boxVisita].sort((a, b) => b.pts - a.pts).slice(0, 3);
-    return all;
+    return [...boxLocal, ...boxVisita].sort((a, b) => b.pts - a.pts).slice(0, 3);
   }, [boxLocal, boxVisita]);
 
   const lastJugada = jugadas[0];
@@ -138,10 +158,11 @@ export function PartidoView({
   const visit  = partido.equipoVisitanteNombre ?? 'Visitante';
   const logoLocal = equipos.get(partido.equipoLocalId     || '')?.logoUrl;
   const logoVisit = equipos.get(partido.equipoVisitanteId || '')?.logoUrl;
+  const localGana = ml > mv;
 
   return (
     <div className="space-y-6">
-      {/* HERO MARCADOR */}
+      {/* MARCADOR */}
       <div className={
         'rounded-2xl bg-white shadow-card overflow-hidden border-2 ' +
         (isLive ? 'border-liga-coral' : isFinal ? 'border-liga-final' : 'border-[var(--color-border)]')
@@ -174,36 +195,53 @@ export function PartidoView({
           </span>
         </div>
 
-        {/* Marcador */}
-        <div className="px-5 sm:px-8 py-6 sm:py-8">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 sm:gap-8">
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-              <TeamLogo nombre={local} logoUrl={logoLocal} size={64} ring />
-              <div className="min-w-0">
-                <p className="font-extrabold text-base sm:text-xl leading-tight truncate">{local}</p>
-                <p className="text-[11px] text-[var(--color-text-dim)] mt-0.5">Local</p>
-              </div>
-            </div>
-            <div className={'flex items-baseline gap-3 sm:gap-6 tabular-nums transition-transform ' + (pulse ? 'scale-110' : '')}>
-              <span className="text-5xl sm:text-7xl font-extrabold leading-none">{ml}</span>
-              <span className="text-2xl text-[var(--color-text-dim2)]">·</span>
-              <span className="text-5xl sm:text-7xl font-extrabold leading-none">{mv}</span>
-            </div>
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0 justify-end">
-              <div className="min-w-0 text-right">
-                <p className="font-extrabold text-base sm:text-xl leading-tight truncate">{visit}</p>
-                <p className="text-[11px] text-[var(--color-text-dim)] mt-0.5">Visitante</p>
-              </div>
-              <TeamLogo nombre={visit} logoUrl={logoVisit} size={64} ring />
-            </div>
+        {/* Marcador — layout vertical estilo ESPN scoreboard */}
+        <div className="px-4 sm:px-6 py-5">
+          {/* Local */}
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 sm:gap-4 py-2">
+            <TeamLogo nombre={local} logoUrl={logoLocal} size={52} ring />
+            <p className={
+              'font-extrabold text-base sm:text-2xl leading-tight truncate ' +
+              (isFinal && !localGana ? 'text-[var(--color-text-dim)]' : 'text-[var(--color-text)]')
+            }>
+              {local}
+            </p>
+            <span className={
+              'text-4xl sm:text-6xl font-extrabold tabular-nums leading-none transition-transform ' +
+              (pulse ? 'scale-110 ' : '') +
+              (isFinal && !localGana ? 'text-[var(--color-text-dim)]' : 'text-[var(--color-text)]')
+            }>
+              {ml}
+            </span>
+          </div>
+
+          {/* Separator */}
+          <div className="h-px bg-[var(--color-border)] my-2" />
+
+          {/* Visitante */}
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 sm:gap-4 py-2">
+            <TeamLogo nombre={visit} logoUrl={logoVisit} size={52} ring />
+            <p className={
+              'font-extrabold text-base sm:text-2xl leading-tight truncate ' +
+              (isFinal && localGana ? 'text-[var(--color-text-dim)]' : 'text-[var(--color-text)]')
+            }>
+              {visit}
+            </p>
+            <span className={
+              'text-4xl sm:text-6xl font-extrabold tabular-nums leading-none transition-transform ' +
+              (pulse ? 'scale-110 ' : '') +
+              (isFinal && localGana ? 'text-[var(--color-text-dim)]' : 'text-[var(--color-text)]')
+            }>
+              {mv}
+            </span>
           </div>
 
           {/* Mini box por cuartos */}
           {partido.cuartosLocal && (
-            <div className="mt-6 overflow-x-auto">
+            <div className="mt-5 pt-4 border-t border-[var(--color-border)] overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-[var(--color-text-dim2)] border-b border-[var(--color-border)]">
+                  <tr className="text-[var(--color-text-dim2)]">
                     <th className="text-left py-2 font-bold">&nbsp;</th>
                     <th className="py-2 px-2 font-bold">Q1</th>
                     <th className="py-2 px-2 font-bold">Q2</th>
@@ -218,8 +256,8 @@ export function PartidoView({
                     const nombre  = team === 'local' ? local : visit;
                     const total   = team === 'local' ? ml : mv;
                     return (
-                      <tr key={team} className="border-b border-[var(--color-border)] last:border-b-0">
-                        <td className="py-2 font-bold truncate max-w-[160px]">{nombre}</td>
+                      <tr key={team} className="border-t border-[var(--color-border)]">
+                        <td className="py-2 font-bold truncate max-w-[140px] sm:max-w-none">{nombre}</td>
                         {['Q1','Q2','Q3','Q4'].map(q => (
                           <td key={q} className={'py-2 px-2 text-center tabular-nums ' + (q === cuarto && isLive ? 'text-liga-live font-extrabold' : 'text-[var(--color-text-dim)]')}>
                             {cuartos?.[q] ?? 0}
@@ -265,80 +303,13 @@ export function PartidoView({
               )}
             </div>
             <span className={
-              'text-[10px] font-extrabold px-2.5 py-1 rounded-full ' +
+              'text-[10px] font-extrabold px-2.5 py-1 rounded-full flex-shrink-0 ' +
               (lastJugada.equipo === 'local' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700')
             }>
-              {lastJugada.equipo === 'local' ? local : visit}
+              {(lastJugada.equipo === 'local' ? local : visit).slice(0, 12)}
             </span>
           </div>
         </div>
-      )}
-
-      {/* PLAY BY PLAY */}
-      {jugadas.length > 0 && (
-        <section className="bg-white rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden">
-          <button
-            onClick={() => setPbpOpen(v => !v)}
-            className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-[var(--color-bg)] transition-colors"
-          >
-            <span className="text-xs font-extrabold tracking-widest text-[var(--color-text)] uppercase flex items-center gap-2">
-              <span className={'inline-block transition-transform text-[10px] ' + (pbpOpen ? 'rotate-0' : '-rotate-90')}>▼</span>
-              📋 Play by Play
-            </span>
-            <span className="text-xs text-[var(--color-text-dim)] font-bold">
-              {jugadas.length} {jugadas.length === 1 ? 'jugada' : 'jugadas'}
-            </span>
-          </button>
-          {pbpOpen && (
-            <div className="max-h-96 overflow-y-auto border-t border-[var(--color-border)]">
-              {jugadas.map((j, idx) => {
-                const acc = ACCIONES[j.accion];
-                const esSub = j.accion === 'sustitucion';
-                return (
-                  <div key={j.id} className={
-                    'flex items-center gap-3 px-4 py-2.5 border-t border-[var(--color-border)] first:border-t-0 ' +
-                    (idx === 0 && isLive ? 'bg-liga-coralSoft' : '')
-                  }>
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${acc?.bg ?? 'bg-zinc-100'}`}>
-                      <span className="text-base">{acc?.icon ?? '🏀'}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      {esSub ? (
-                        <>
-                          <p className="text-[10px] font-extrabold text-purple-700 uppercase">Cambio</p>
-                          <p className="text-[11px] leading-tight">
-                            <span className="text-red-600">↓ #{j.jugadorSaleNumero} {j.jugadorSaleNombre}</span>
-                            <br />
-                            <span className="text-emerald-600">↑ #{j.jugadorNumero} {j.jugadorNombre}</span>
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-xs font-extrabold truncate text-[var(--color-text)]">#{j.jugadorNumero} {j.jugadorNombre}</p>
-                          <p className="text-[10px] text-[var(--color-text-dim)]">
-                            {acc?.label ?? j.accion}
-                            {j.puntos > 0 && <span className="text-emerald-600 font-extrabold ml-1">+{j.puntos}</span>}
-                          </p>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <span className={
-                        'text-[9px] font-extrabold px-1.5 py-0.5 rounded ' +
-                        (j.equipo === 'local' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700')
-                      }>
-                        {(j.equipo === 'local' ? local : visit).slice(0, 8)}
-                      </span>
-                      {j.cuarto && (
-                        <span className="text-[9px] font-bold text-[var(--color-text-dim2)]">{j.cuarto}</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
       )}
 
       {/* TOP PERFORMERS */}
@@ -350,7 +321,7 @@ export function PartidoView({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {topPerformers.map((p, idx) => (
               <div key={p.jugadorId} className="bg-white rounded-xl border border-[var(--color-border)] shadow-card p-4">
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-1">
                   <span className="text-[10px] font-extrabold tracking-widest text-liga-gold uppercase">
                     {idx === 0 ? '⭐ MVP' : `#${idx + 1}`}
                   </span>
@@ -440,6 +411,73 @@ export function PartidoView({
               );
             })}
           </div>
+        </section>
+      )}
+
+      {/* PLAY BY PLAY (al final) */}
+      {jugadas.length > 0 && (
+        <section className="bg-white rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden">
+          <button
+            onClick={() => setPbpOpen(v => !v)}
+            className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-[var(--color-bg)] transition-colors"
+          >
+            <span className="text-xs font-extrabold tracking-widest text-[var(--color-text)] uppercase flex items-center gap-2">
+              <span className={'inline-block transition-transform text-[10px] ' + (pbpOpen ? 'rotate-0' : '-rotate-90')}>▼</span>
+              📋 Play by Play
+            </span>
+            <span className="text-xs text-[var(--color-text-dim)] font-bold">
+              {jugadas.length} {jugadas.length === 1 ? 'jugada' : 'jugadas'}
+            </span>
+          </button>
+          {pbpOpen && (
+            <div className="max-h-96 overflow-y-auto border-t border-[var(--color-border)]">
+              {jugadas.map((j, idx) => {
+                const acc = ACCIONES[j.accion];
+                const esSub = j.accion === 'sustitucion';
+                return (
+                  <div key={j.id} className={
+                    'flex items-center gap-3 px-4 py-2.5 border-t border-[var(--color-border)] first:border-t-0 ' +
+                    (idx === 0 && isLive ? 'bg-liga-coralSoft' : '')
+                  }>
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${acc?.bg ?? 'bg-zinc-100'}`}>
+                      <span className="text-base">{acc?.icon ?? '🏀'}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {esSub ? (
+                        <>
+                          <p className="text-[10px] font-extrabold text-purple-700 uppercase">Cambio</p>
+                          <p className="text-[11px] leading-tight">
+                            <span className="text-red-600">↓ #{j.jugadorSaleNumero} {j.jugadorSaleNombre}</span>
+                            <br />
+                            <span className="text-emerald-600">↑ #{j.jugadorNumero} {j.jugadorNombre}</span>
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-xs font-extrabold truncate text-[var(--color-text)]">#{j.jugadorNumero} {j.jugadorNombre}</p>
+                          <p className="text-[10px] text-[var(--color-text-dim)]">
+                            {acc?.label ?? j.accion}
+                            {j.puntos > 0 && <span className="text-emerald-600 font-extrabold ml-1">+{j.puntos}</span>}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                      <span className={
+                        'text-[9px] font-extrabold px-1.5 py-0.5 rounded ' +
+                        (j.equipo === 'local' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700')
+                      }>
+                        {(j.equipo === 'local' ? local : visit).slice(0, 8)}
+                      </span>
+                      {j.cuarto && (
+                        <span className="text-[9px] font-bold text-[var(--color-text-dim2)]">{j.cuarto}</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
       )}
     </div>
