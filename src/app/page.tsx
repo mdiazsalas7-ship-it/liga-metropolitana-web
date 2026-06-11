@@ -4,8 +4,8 @@
 import Link from 'next/link';
 import { CATEGORIAS } from '@/lib/categorias';
 import {
-  getPartidoEnVivo, getProximosPartidos, getUltimosResultados,
-  getLideres, getEquipos, getNoticias, getPartidosParaStrip, getEntrevistas,
+  getPartidoEnVivo, getLideres, getEquipos, getNoticias,
+  getPartidosParaStrip, getEntrevistas,
 } from '@/lib/queries';
 import { GamesStrip } from '@/components/GamesStrip';
 import { FeaturedStory } from '@/components/FeaturedStory';
@@ -13,7 +13,6 @@ import { HeadlinesSidebar } from '@/components/HeadlinesSidebar';
 import { AroundLeagueList } from '@/components/AroundLeagueList';
 import { EntrevistasCarousel } from '@/components/EntrevistasCarousel';
 import { LiveScoreCard } from '@/components/LiveScoreCard';
-import { MatchCard } from '@/components/MatchCard';
 import { LeaderCard } from '@/components/LeaderCard';
 import { esDestacada, imagenDeNoticia } from '@/lib/noticias';
 
@@ -39,19 +38,17 @@ function SectionHeader({ title, sub, link, linkLabel = 'Ver todos →' }: {
 
 export default async function HomePage() {
   const [
-    enVivo, proximos, resultados, noticias, partidosStrip, entrevistas,
+    enVivo, noticias, partidosStrip, entrevistas,
   ] = await Promise.all([
     getPartidoEnVivo(),
-    getProximosPartidos(6),
-    getUltimosResultados(6),
     getNoticias(12),
     getPartidosParaStrip(),
     getEntrevistas(8),
   ]);
 
-  // Equipos por categorías visibles para mostrar logos
+  // Equipos por categorías visibles para mostrar logos (los del strip)
   const catsUsadas = new Set<string>();
-  [...proximos, ...resultados, ...partidosStrip].forEach(p => p.categoria && catsUsadas.add(p.categoria));
+  partidosStrip.forEach(p => p.categoria && catsUsadas.add(p.categoria));
   const equiposPorCat = new Map<string, Awaited<ReturnType<typeof getEquipos>>>();
   await Promise.all(
     Array.from(catsUsadas).map(async cat => {
@@ -119,30 +116,6 @@ export default async function HomePage() {
             categoriaInicial={enVivo.categoria}
             partidoInicial={enVivo}
           />
-        )}
-
-        {/* PRÓXIMOS */}
-        {proximos.length > 0 && (
-          <section>
-            <SectionHeader title="Esta semana" sub="Próximos partidos" link="/calendario" linkLabel="Ver calendario →" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {proximos.map(p => (
-                <MatchCard key={p.id} partido={p} equipos={equiposAll} variant="proximo" />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* RESULTADOS */}
-        {resultados.length > 0 && (
-          <section>
-            <SectionHeader title="Resultados recientes" link="/calendario" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {resultados.map(p => (
-                <MatchCard key={p.id} partido={p} equipos={equiposAll} variant="resultado" />
-              ))}
-            </div>
-          </section>
         )}
 
         {/* ENTREVISTAS / VIDEOS */}
