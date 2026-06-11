@@ -5,7 +5,8 @@
 // stats grid de 4 columnas con glassmorphism.
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { LEAGUE_LOGO_URL } from '@/lib/site';
 import type { Jugador } from '@/types';
 
 // Paleta de colores accent del modal — un color por jugador, hash del nombre.
@@ -20,7 +21,7 @@ const ACCENT_PALETTE = [
   '#134e4a', // teal-dark
 ];
 
-const LEAGUE_LOGO = 'https://i.postimg.cc/FKgNmFpv/Whats_App_Image_2026_01_25_at_12_07_36_AM.jpg';
+const LEAGUE_LOGO = LEAGUE_LOGO_URL;
 
 function accentOf(nombre?: string): string {
   if (!nombre) return ACCENT_PALETTE[0];

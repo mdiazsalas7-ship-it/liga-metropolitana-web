@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { APP_URL } from '@/lib/site';
+import { APP_URL, LEAGUE_LOGO_URL } from '@/lib/site';
 
 const NAV = [
   { href: '/',            label: 'Inicio' },
@@ -17,8 +17,12 @@ export function SiteHeader() {
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
         {/* Logo + branding */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-11 h-11 rounded-md bg-liga-coral flex items-center justify-center font-extrabold text-white text-base group-hover:scale-105 transition-transform">
-            LM
+          <div className="w-11 h-11 rounded-full overflow-hidden bg-white shadow-md ring-2 ring-white/20 group-hover:ring-liga-coral/60 transition-all flex-shrink-0">
+            <img
+              src={LEAGUE_LOGO_URL}
+              alt="Liga Metropolitana Eje Este"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="hidden sm:flex flex-col leading-tight">
             <span className="font-bold text-sm">Liga Metropolitana</span>
