@@ -16,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/posiciones`, changeFrequency: 'daily',   priority: 0.9, lastModified: now },
     { url: `${SITE_URL}/equipos`,    changeFrequency: 'weekly',  priority: 0.7, lastModified: now },
     { url: `${SITE_URL}/jugadores`,  changeFrequency: 'daily',   priority: 0.7, lastModified: now },
+    { url: `${SITE_URL}/entrevistas`, changeFrequency: 'daily',  priority: 0.7, lastModified: now },
     { url: `${SITE_URL}/noticias`,   changeFrequency: 'daily',   priority: 0.8, lastModified: now },
   ];
 

@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { CATEGORIAS } from '@/lib/categorias';
 import {
   getPartidoEnVivo, getProximosPartidos, getUltimosResultados,
-  getLideres, getEquipos, getNoticias, getPartidosParaStrip,
+  getLideres, getEquipos, getNoticias, getPartidosParaStrip, getEntrevistas,
 } from '@/lib/queries';
 import { GamesStrip } from '@/components/GamesStrip';
 import { FeaturedStory } from '@/components/FeaturedStory';
 import { HeadlinesSidebar } from '@/components/HeadlinesSidebar';
 import { AroundLeagueList } from '@/components/AroundLeagueList';
+import { EntrevistasCarousel } from '@/components/EntrevistasCarousel';
 import { LiveScoreCard } from '@/components/LiveScoreCard';
 import { MatchCard } from '@/components/MatchCard';
 import { LeaderCard } from '@/components/LeaderCard';
@@ -38,13 +39,14 @@ function SectionHeader({ title, sub, link, linkLabel = 'Ver todos →' }: {
 
 export default async function HomePage() {
   const [
-    enVivo, proximos, resultados, noticias, partidosStrip,
+    enVivo, proximos, resultados, noticias, partidosStrip, entrevistas,
   ] = await Promise.all([
     getPartidoEnVivo(),
     getProximosPartidos(6),
     getUltimosResultados(6),
-    getNoticias(12), // más noticias para el rediseño
+    getNoticias(12),
     getPartidosParaStrip(),
+    getEntrevistas(8),
   ]);
 
   // Equipos por categorías visibles para mostrar logos
@@ -140,6 +142,19 @@ export default async function HomePage() {
                 <MatchCard key={p.id} partido={p} equipos={equiposAll} variant="resultado" />
               ))}
             </div>
+          </section>
+        )}
+
+        {/* ENTREVISTAS / VIDEOS */}
+        {entrevistas.length > 0 && (
+          <section>
+            <SectionHeader
+              title="Entrevistas y videos"
+              sub="Lo último de la liga en cámara"
+              link="/entrevistas"
+              linkLabel="Ver todas →"
+            />
+            <EntrevistasCarousel entrevistas={entrevistas} />
           </section>
         )}
 

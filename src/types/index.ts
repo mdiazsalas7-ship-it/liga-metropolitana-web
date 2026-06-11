@@ -72,3 +72,14 @@ export interface Noticia {
   // Tipo opcional: 'destacado' lleva la noticia al hero principal.
   tipo?: string;
 }
+
+// Video/entrevista. Subido desde el panel AdminVideos de la app.
+export interface Entrevista {
+  id: string;
+  titulo: string;
+  videoUrl: string;
+  thumbnailUrl?: string;
+  fecha?: string;       // string libre: "14/2/2026", "10 Feb 2026", etc.
+  createdAt?: number;   // ms desde epoch (Date.now())
+  storagePath?: string;
+}

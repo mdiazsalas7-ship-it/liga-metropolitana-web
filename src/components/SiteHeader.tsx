@@ -2,12 +2,13 @@ import Link from 'next/link';
 import { APP_URL } from '@/lib/site';
 
 const NAV = [
-  { href: '/',           label: 'Inicio' },
-  { href: '/calendario', label: 'Calendario' },
-  { href: '/posiciones', label: 'Tabla' },
-  { href: '/equipos',    label: 'Equipos' },
-  { href: '/jugadores',  label: 'Stats' },
-  { href: '/noticias',   label: 'Noticias' },
+  { href: '/',            label: 'Inicio' },
+  { href: '/calendario',  label: 'Calendario' },
+  { href: '/posiciones',  label: 'Tabla' },
+  { href: '/equipos',     label: 'Equipos' },
+  { href: '/jugadores',   label: 'Stats' },
+  { href: '/entrevistas', label: 'Videos' },
+  { href: '/noticias',    label: 'Noticias' },
 ];
 
 export function SiteHeader() {

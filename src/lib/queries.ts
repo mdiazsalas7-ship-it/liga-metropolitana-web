@@ -375,3 +375,24 @@ export async function getPartidosParaStrip(): Promise<Partido[]> {
   }
   return all;
 }
+
+/** Entrevistas (videos). Ordenadas por createdAt desc. */
+export async function getEntrevistas(n = 12): Promise<import('@/types').Entrevista[]> {
+  const db = getDb();
+  try {
+    // createdAt es number ms; orderBy funciona perfecto
+    const snap = await getDocs(query(
+      collection(db, 'entrevistas'),
+      orderBy('createdAt', 'desc'),
+      limit(n)
+    ));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as import('@/types').Entrevista));
+  } catch {
+    // Fallback: sin orderBy si createdAt no existe en algunos docs
+    try {
+      const snap = await getDocs(query(collection(db, 'entrevistas'), limit(50)));
+      const all = snap.docs.map(d => ({ id: d.id, ...d.data() } as import('@/types').Entrevista));
+      return all.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0)).slice(0, n);
+    } catch { return []; }
+  }
+}
