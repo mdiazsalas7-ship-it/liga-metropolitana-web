@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { fechaRelativa } from '@/lib/fechas';
+import { imagenDeNoticia, cuerpoDeNoticia } from '@/lib/noticias';
 import type { Noticia } from '@/types';
 
 export function AroundLeagueList({ noticias }: { noticias: Noticia[] }) {
@@ -14,41 +15,45 @@ export function AroundLeagueList({ noticias }: { noticias: Noticia[] }) {
         Alrededor de la liga
       </h2>
       <ul className="divide-y divide-[var(--color-border)]">
-        {noticias.map(n => (
-          <li key={n.id}>
-            <Link
-              href="/noticias"
-              className="flex gap-4 px-5 py-4 hover:bg-zinc-50 transition-colors"
-            >
-              {n.imagenUrl ? (
-                <img
-                  src={n.imagenUrl}
-                  alt=""
-                  className="w-20 h-20 sm:w-28 sm:h-20 rounded object-cover flex-shrink-0"
-                />
-              ) : (
-                <div className="w-20 h-20 sm:w-28 sm:h-20 rounded flex-shrink-0 bg-liga-coralSoft flex items-center justify-center">
-                  <span className="text-2xl">📰</span>
+        {noticias.map(n => {
+          const img    = imagenDeNoticia(n);
+          const cuerpo = cuerpoDeNoticia(n);
+          return (
+            <li key={n.id}>
+              <Link
+                href="/noticias"
+                className="flex gap-4 px-5 py-4 hover:bg-zinc-50 transition-colors"
+              >
+                {img ? (
+                  <img
+                    src={img}
+                    alt=""
+                    className="w-20 h-20 sm:w-28 sm:h-20 rounded object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-20 h-20 sm:w-28 sm:h-20 rounded flex-shrink-0 bg-liga-coralSoft flex items-center justify-center">
+                    <span className="text-2xl">📰</span>
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm sm:text-base font-extrabold leading-tight text-[var(--color-text)] line-clamp-2">
+                    {n.titulo}
+                  </h3>
+                  {cuerpo && (
+                    <p className="text-xs sm:text-sm text-[var(--color-text-dim)] mt-1.5 line-clamp-2 leading-relaxed">
+                      {cuerpo}
+                    </p>
+                  )}
+                  {n.fecha && (
+                    <p className="text-[10px] text-[var(--color-text-dim2)] mt-2 font-bold uppercase tracking-wider">
+                      {fechaRelativa(n.fecha)}
+                    </p>
+                  )}
                 </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <h3 className="text-sm sm:text-base font-extrabold leading-tight text-[var(--color-text)] line-clamp-2">
-                  {n.titulo}
-                </h3>
-                {n.contenido && (
-                  <p className="text-xs sm:text-sm text-[var(--color-text-dim)] mt-1.5 line-clamp-2 leading-relaxed">
-                    {n.contenido}
-                  </p>
-                )}
-                {n.fecha && (
-                  <p className="text-[10px] text-[var(--color-text-dim2)] mt-2 font-bold uppercase tracking-wider">
-                    {fechaRelativa(n.fecha)}
-                  </p>
-                )}
-              </div>
-            </Link>
-          </li>
-        ))}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

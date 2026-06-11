@@ -143,7 +143,13 @@ export async function getNoticias(n = 3): Promise<Noticia[]> {
       limit(n)
     ));
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as Noticia));
-  } catch { return []; }
+  } catch {
+    // Fallback: leer sin orderBy (por si el campo fecha no es ordenable)
+    try {
+      const snap = await getDocs(query(collection(db, 'noticias'), limit(50)));
+      return snap.docs.map(d => ({ id: d.id, ...d.data() } as Noticia)).slice(0, n);
+    } catch { return []; }
+  }
 }
 
 /** Todos los partidos de una categoría (ordenados por fecha desc). */

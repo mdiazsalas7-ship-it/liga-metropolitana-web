@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getTodasNoticias } from '@/lib/queries';
 import { fechaRelativa } from '@/lib/fechas';
+import { imagenDeNoticia, cuerpoDeNoticia } from '@/lib/noticias';
 
 export const revalidate = 60;
 export const dynamic = 'force-dynamic';
@@ -34,22 +35,35 @@ export default async function NoticiasPage() {
           <p className="text-sm text-[var(--color-text-dim)]">Sin noticias publicadas todavía.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {noticias.map(n => (
-            <article key={n.id} className="rounded-xl border border-[var(--color-border)] bg-white shadow-card p-5">
-              {n.fecha && (
-                <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] mb-2 font-bold">
-                  {fechaRelativa(n.fecha)}
-                </p>
-              )}
-              <h2 className="text-lg font-bold leading-snug mb-2">{n.titulo}</h2>
-              {n.contenido && (
-                <p className="text-sm text-[var(--color-text-dim)] leading-relaxed whitespace-pre-wrap">
-                  {n.contenido}
-                </p>
-              )}
-            </article>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {noticias.map(n => {
+            const img    = imagenDeNoticia(n);
+            const cuerpo = cuerpoDeNoticia(n);
+            return (
+              <article key={n.id} className="bg-white rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden card-hover">
+                {img && (
+                  <img
+                    src={img}
+                    alt={n.titulo}
+                    className="w-full h-48 sm:h-56 object-cover"
+                  />
+                )}
+                <div className="p-5">
+                  {n.fecha && (
+                    <p className="text-[10px] uppercase tracking-wider text-liga-coral mb-2 font-extrabold">
+                      {fechaRelativa(n.fecha)}
+                    </p>
+                  )}
+                  <h2 className="text-lg font-extrabold leading-snug mb-2 text-[var(--color-text)]">{n.titulo}</h2>
+                  {cuerpo && (
+                    <p className="text-sm text-[var(--color-text-dim)] leading-relaxed whitespace-pre-wrap">
+                      {cuerpo}
+                    </p>
+                  )}
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </div>

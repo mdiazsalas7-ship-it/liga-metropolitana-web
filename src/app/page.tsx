@@ -14,6 +14,7 @@ import { AroundLeagueList } from '@/components/AroundLeagueList';
 import { LiveScoreCard } from '@/components/LiveScoreCard';
 import { MatchCard } from '@/components/MatchCard';
 import { LeaderCard } from '@/components/LeaderCard';
+import { esDestacada, imagenDeNoticia } from '@/lib/noticias';
 
 export const revalidate = 60;
 
@@ -66,8 +67,12 @@ export default async function HomePage() {
     if (res.length > 0) { lideresPuntos = res; categoriaLider = cat.label; break; }
   }
 
-  // Noticia destacada = la más reciente con imagen, o la primera si ninguna tiene
-  const featured = noticias.find(n => !!n.imagenUrl) ?? noticias[0];
+  // Noticia destacada: primero la marcada con `tipo: 'destacado'`,
+  // si no hay, la más reciente con imagen, y si no, la primera.
+  const featured =
+    noticias.find(esDestacada) ??
+    noticias.find(n => !!imagenDeNoticia(n)) ??
+    noticias[0];
   const headlinesNews = noticias.filter(n => !featured || n.id !== featured.id);
 
   return (

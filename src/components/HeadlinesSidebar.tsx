@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { fechaRelativa } from '@/lib/fechas';
+import { imagenDeNoticia } from '@/lib/noticias';
 import type { Noticia } from '@/types';
 
 export function HeadlinesSidebar({ noticias }: { noticias: Noticia[] }) {
@@ -18,32 +19,35 @@ export function HeadlinesSidebar({ noticias }: { noticias: Noticia[] }) {
         </Link>
       </div>
       <ul className="divide-y divide-[var(--color-border)]">
-        {noticias.slice(0, 6).map(n => (
-          <li key={n.id}>
-            <Link
-              href="/noticias"
-              className="flex items-start gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors"
-            >
-              {n.imagenUrl && (
-                <img
-                  src={n.imagenUrl}
-                  alt=""
-                  className="w-14 h-14 rounded object-cover flex-shrink-0"
-                />
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-extrabold leading-tight text-[var(--color-text)] line-clamp-2">
-                  {n.titulo}
-                </p>
-                {n.fecha && (
-                  <p className="text-[10px] text-[var(--color-text-dim)] mt-1 font-bold uppercase tracking-wider">
-                    {fechaRelativa(n.fecha)}
-                  </p>
+        {noticias.slice(0, 6).map(n => {
+          const img = imagenDeNoticia(n);
+          return (
+            <li key={n.id}>
+              <Link
+                href="/noticias"
+                className="flex items-start gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors"
+              >
+                {img && (
+                  <img
+                    src={img}
+                    alt=""
+                    className="w-14 h-14 rounded object-cover flex-shrink-0"
+                  />
                 )}
-              </div>
-            </Link>
-          </li>
-        ))}
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-extrabold leading-tight text-[var(--color-text)] line-clamp-2">
+                    {n.titulo}
+                  </p>
+                  {n.fecha && (
+                    <p className="text-[10px] text-[var(--color-text-dim)] mt-1 font-bold uppercase tracking-wider">
+                      {fechaRelativa(n.fecha)}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

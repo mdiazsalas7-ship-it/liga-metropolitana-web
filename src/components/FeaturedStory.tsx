@@ -3,10 +3,13 @@
 
 import Link from 'next/link';
 import { fechaRelativa } from '@/lib/fechas';
+import { imagenDeNoticia, cuerpoDeNoticia } from '@/lib/noticias';
 import type { Noticia } from '@/types';
 
 export function FeaturedStory({ noticia }: { noticia: Noticia }) {
-  const hasImage = !!noticia.imagenUrl;
+  const imagen   = imagenDeNoticia(noticia);
+  const cuerpo   = cuerpoDeNoticia(noticia);
+  const hasImage = !!imagen;
 
   return (
     <Link
@@ -16,7 +19,7 @@ export function FeaturedStory({ noticia }: { noticia: Noticia }) {
       {/* Imagen de fondo */}
       {hasImage && (
         <img
-          src={noticia.imagenUrl}
+          src={imagen}
           alt={noticia.titulo}
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -47,9 +50,9 @@ export function FeaturedStory({ noticia }: { noticia: Noticia }) {
         <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-3 max-w-3xl drop-shadow-lg">
           {noticia.titulo}
         </h1>
-        {noticia.contenido && (
+        {cuerpo && (
           <p className="text-sm sm:text-base text-zinc-200 max-w-2xl line-clamp-2 leading-relaxed drop-shadow-md">
-            {noticia.contenido}
+            {cuerpo}
           </p>
         )}
         <div className="mt-4">
