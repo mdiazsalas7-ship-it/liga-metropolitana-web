@@ -1,12 +1,33 @@
 'use client';
 
-// Modal estilo "trading card" Upper Deck.
-// Se abre al click sobre un jugador del roster del equipo.
+// Modal tipo "trading card" Upper Deck — estilo idéntico al de la app vieja.
+// Fondo oscuro premium, foto grande, número decorativo, accent color por jugador,
+// stats grid de 4 columnas con glassmorphism.
 
 import Link from 'next/link';
-import { useEffect } from 'react';
-import { TeamLogo } from './TeamLogo';
+import { useEffect, useState } from 'react';
 import type { Jugador } from '@/types';
+
+// Paleta de colores accent del modal — un color por jugador, hash del nombre.
+const ACCENT_PALETTE = [
+  '#1e3a8a', // navy
+  '#0369a1', // sky
+  '#065f46', // teal
+  '#7c2d12', // brown-red
+  '#4c1d95', // violet
+  '#831843', // pink-dark
+  '#92400e', // amber-dark
+  '#134e4a', // teal-dark
+];
+
+const LEAGUE_LOGO = 'https://i.postimg.cc/FKgNmFpv/Whats_App_Image_2026_01_25_at_12_07_36_AM.jpg';
+
+function accentOf(nombre?: string): string {
+  if (!nombre) return ACCENT_PALETTE[0];
+  let h = 0;
+  for (let i = 0; i < nombre.length; i++) h += nombre.charCodeAt(i);
+  return ACCENT_PALETTE[h % ACCENT_PALETTE.length];
+}
 
 interface Props {
   jugador: Jugador | null;
@@ -16,29 +37,10 @@ interface Props {
   onClose: () => void;
 }
 
-// Hashea el nombre del equipo a una paleta consistente
-const TEAM_PALETTES = [
-  { primary: '#1e40af', soft: '#dbeafe', name: 'azul' },
-  { primary: '#7c3aed', soft: '#ede9fe', name: 'purpura' },
-  { primary: '#0f766e', soft: '#ccfbf1', name: 'teal' },
-  { primary: '#b91c1c', soft: '#fee2e2', name: 'rojo' },
-  { primary: '#D85A30', soft: '#FAECE7', name: 'coral' },
-  { primary: '#a16207', soft: '#fef3c7', name: 'ambar' },
-  { primary: '#15803d', soft: '#dcfce7', name: 'verde' },
-  { primary: '#be185d', soft: '#fce7f3', name: 'rosa' },
-];
-
-function hashColor(nombre?: string) {
-  if (!nombre) return TEAM_PALETTES[0];
-  let h = 0;
-  for (let i = 0; i < nombre.length; i++) h = (h * 31 + nombre.charCodeAt(i)) >>> 0;
-  return TEAM_PALETTES[h % TEAM_PALETTES.length];
-}
-
 export function PlayerCardModal({
-  jugador, categoriaId, equipoNombre, equipoLogoUrl, onClose,
+  jugador, categoriaId, equipoNombre, onClose,
 }: Props) {
-  // ESC para cerrar
+  // ESC para cerrar + bloquea scroll del body
   useEffect(() => {
     if (!jugador) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -52,168 +54,205 @@ export function PlayerCardModal({
 
   if (!jugador) return null;
 
-  const palette = hashColor(equipoNombre || jugador.equipoNombre);
-  const pj = jugador.partidosJugados || 0;
-  const ppp = pj > 0 ? ((jugador.puntos     ?? 0) / pj).toFixed(1) : '0.0';
-  const rpp = pj > 0 ? ((jugador.rebotes    ?? 0) / pj).toFixed(1) : '0.0';
-  const tpp = pj > 0 ? ((jugador.triples    ?? 0) / pj).toFixed(1) : '0.0';
-  const spp = pj > 0 ? ((jugador.robos      ?? 0) / pj).toFixed(1) : '0.0';
-  const bpp = pj > 0 ? ((jugador.bloqueos   ?? 0) / pj).toFixed(1) : '0.0';
-  const tlpp= pj > 0 ? ((jugador.tirosLibres?? 0) / pj).toFixed(1) : '0.0';
+  const accent = accentOf(jugador.nombre);
+  const pj    = jugador.partidosJugados || 0;
+  const noPJ  = pj === 0;
+
+  // Igual que la app: 4 stats principales, con total y avg/PJ
+  const stats = [
+    { label: 'PTS', icon: '🔥', color: '#ef4444', total: jugador.puntos  ?? 0 },
+    { label: 'REB', icon: '🖐️', color: '#10b981', total: jugador.rebotes ?? 0 },
+    { label: 'ROB', icon: '🛡️', color: '#6366f1', total: jugador.robos   ?? 0 },
+    { label: '3PT', icon: '🏹', color: '#8b5cf6', total: jugador.triples ?? 0 },
+  ].map(s => ({
+    ...s,
+    avg: noPJ ? '—' : (s.total / Math.max(pj, 1)).toFixed(1),
+  }));
+
+  const teamNombre = (equipoNombre || jugador.equipoNombre || '').toUpperCase();
+  const nombreUp   = (jugador.nombre || '').toUpperCase();
+  const initial    = (jugador.nombre || '?').charAt(0).toUpperCase();
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in"
-      style={{ background: 'rgba(0, 0, 0, 0.75)' }}
       onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
+      style={{
+        background: 'rgba(0,0,0,0.85)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+      }}
     >
       <div
-        className="relative bg-white rounded-2xl overflow-hidden w-full max-w-md sm:max-w-lg shadow-2xl max-h-[95vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
+        className="relative w-full max-w-[340px] rounded-3xl overflow-hidden"
         style={{
-          border: `3px solid ${palette.primary}`,
+          background: '#080c18',
+          boxShadow: `0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px ${accent}44`,
+          fontFamily: "'Inter','Segoe UI',sans-serif",
         }}
       >
-        {/* Botón cerrar */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center text-zinc-700 font-bold text-lg"
-          aria-label="Cerrar"
-        >
-          ×
-        </button>
-
-        {/* HEADER de la card: número gigante y banda del color del equipo */}
+        {/* Franja superior de color */}
         <div
-          className="relative h-44 sm:h-52 overflow-hidden"
-          style={{ background: palette.primary }}
+          className="h-1"
+          style={{ background: `linear-gradient(90deg, ${accent}, ${accent}44, transparent)` }}
+        />
+
+        {/* HEADER: foto + número + badge */}
+        <div
+          className="relative h-80 overflow-hidden"
+          style={{ background: `linear-gradient(160deg, ${accent}22, #080c18)` }}
         >
-          {/* Patrón de líneas diagonales para textura */}
+          {/* Shine lateral */}
           <div
-            className="absolute inset-0 opacity-20"
-            style={{
-              backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(255,255,255,0.15) 12px, rgba(255,255,255,0.15) 14px)`,
-            }}
+            className="absolute inset-0"
+            style={{ background: `radial-gradient(ellipse at 30% 50%, ${accent}15, transparent 70%)` }}
           />
-          {/* Número gigante de fondo */}
+
+          {/* Número gigante decorativo */}
           {jugador.numero != null && (
-            <span
-              className="absolute -bottom-6 -right-3 font-extrabold leading-none select-none pointer-events-none"
+            <div
+              className="absolute -right-3 -bottom-5 font-black select-none leading-none pointer-events-none"
               style={{
-                fontSize: 'clamp(140px, 35vw, 200px)',
-                color: 'rgba(255, 255, 255, 0.15)',
-                lineHeight: 0.85,
+                fontSize: '9rem',
+                color: 'rgba(255,255,255,0.05)',
               }}
             >
               {jugador.numero}
-            </span>
+            </div>
           )}
-          {/* Top tag */}
-          <div className="relative px-5 pt-4 flex items-center justify-between">
-            <span className="inline-block bg-white text-[10px] font-extrabold tracking-widest uppercase px-2.5 py-1 rounded-full" style={{ color: palette.primary }}>
-              Player Card
-            </span>
-            <span className="inline-block bg-black/30 backdrop-blur text-white text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full">
-              {categoriaId.replace('_', ' ')}
-            </span>
-          </div>
-          {/* Foto + nombre */}
-          <div className="relative px-5 pt-4 flex items-end gap-3 h-full">
-            <div className="absolute bottom-3 left-5 flex items-end gap-3 sm:gap-4">
-              <div className="bg-white rounded-full p-1 shadow-lg">
-                <TeamLogo
-                  nombre={jugador.nombre}
-                  logoUrl={jugador.fotoUrl}
-                  size={84}
-                />
-              </div>
-              <div className="pb-1 text-white">
-                <p className="text-[10px] uppercase tracking-widest opacity-80 font-bold">
-                  #{jugador.numero ?? '–'}
-                </p>
-                <p className="text-xl sm:text-2xl font-extrabold leading-tight drop-shadow-md">
-                  {jugador.nombre}
-                </p>
+
+          {/* Foto o iniciales */}
+          {jugador.fotoUrl ? (
+            <img
+              src={jugador.fotoUrl}
+              alt={jugador.nombre}
+              className="w-full h-full object-cover object-center"
+              onError={e => { e.currentTarget.style.display = 'none'; }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                className="rounded-full flex items-center justify-center font-black text-white"
+                style={{
+                  width: 110, height: 110, fontSize: '3.5rem',
+                  background: `radial-gradient(circle, ${accent}cc, ${accent}44)`,
+                  border: `2px solid ${accent}66`,
+                  boxShadow: `0 0 40px ${accent}44`,
+                }}
+              >
+                {initial}
               </div>
             </div>
-          </div>
-        </div>
+          )}
 
-        {/* Equipo */}
-        <div className="px-5 py-3 flex items-center justify-between border-b border-[var(--color-border)]" style={{ background: palette.soft }}>
-          <div className="flex items-center gap-2.5 min-w-0">
-            <TeamLogo nombre={equipoNombre || jugador.equipoNombre} logoUrl={equipoLogoUrl} size={32} />
-            <div className="min-w-0">
-              <p className="font-extrabold text-sm truncate" style={{ color: palette.primary }}>
-                {equipoNombre || jugador.equipoNombre}
-              </p>
-              <p className="text-[10px] text-zinc-600 uppercase tracking-wider font-bold">
-                {jugador.grupo ? `Grupo ${jugador.grupo}` : 'Temporada 2026'}
-              </p>
-            </div>
-          </div>
-          <span className="text-right">
-            <span className="text-2xl font-extrabold tabular-nums leading-none" style={{ color: palette.primary }}>
-              {pj}
-            </span>
-            <span className="block text-[9px] uppercase tracking-widest text-zinc-600 font-bold">PJ</span>
-          </span>
-        </div>
+          {/* Fade bottom */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-20"
+            style={{ background: 'linear-gradient(to top, #080c18, transparent)' }}
+          />
 
-        {/* Stats principales */}
-        <div className="px-5 py-4">
-          <p className="text-[10px] font-extrabold tracking-widest uppercase text-zinc-500 mb-2">
-            Promedios por partido
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { label: 'PPP',      value: ppp, bg: '#FAECE7', fg: '#993C1D' },
-              { label: 'REB',      value: rpp, bg: '#dcfce7', fg: '#15803d' },
-              { label: 'TRIPLES',  value: tpp, bg: '#ede9fe', fg: '#7c3aed' },
-              { label: 'ROBOS',    value: spp, bg: '#dbeafe', fg: '#1e40af' },
-              { label: 'BLOQUEOS', value: bpp, bg: '#fee2e2', fg: '#b91c1c' },
-              { label: 'T. LIBRES',value: tlpp,bg: '#f4f4f5', fg: '#52525b' },
-            ].map(s => (
-              <div key={s.label} className="rounded-lg p-2.5 text-center" style={{ background: s.bg }}>
-                <p className="text-2xl font-extrabold tabular-nums leading-none" style={{ color: s.fg }}>{s.value}</p>
-                <p className="text-[9px] uppercase tracking-widest font-bold mt-1" style={{ color: s.fg }}>{s.label}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Totales acumulados */}
-          <p className="text-[10px] font-extrabold tracking-widest uppercase text-zinc-500 mt-5 mb-2">
-            Totales acumulados
-          </p>
-          <div className="grid grid-cols-4 gap-2 text-center">
-            {[
-              { label: 'PTS',  value: jugador.puntos      ?? 0 },
-              { label: 'REB',  value: jugador.rebotes     ?? 0 },
-              { label: '3P',   value: jugador.triples     ?? 0 },
-              { label: '2P',   value: jugador.dobles      ?? 0 },
-            ].map(s => (
-              <div key={s.label} className="rounded bg-zinc-50 border border-[var(--color-border)] py-2">
-                <p className="text-lg font-extrabold tabular-nums leading-none text-zinc-900">{s.value}</p>
-                <p className="text-[9px] uppercase tracking-widest font-bold text-zinc-500 mt-1">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="border-t border-[var(--color-border)] bg-zinc-50 px-5 py-3 flex gap-2">
+          {/* Botón cerrar */}
           <button
             onClick={onClose}
-            className="flex-1 text-xs font-bold text-zinc-600 hover:text-zinc-900 transition-colors"
+            aria-label="Cerrar"
+            className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full text-white text-sm font-black flex items-center justify-center backdrop-blur"
+            style={{
+              background: 'rgba(0,0,0,0.5)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}
           >
-            Cerrar
+            ✕
           </button>
-          <Link
-            href={`/jugador/${jugador.id}?categoria=${categoriaId}`}
-            className="flex-1 text-center bg-liga-dark hover:bg-liga-darkSoft text-white text-xs font-extrabold px-4 py-2.5 rounded-lg uppercase tracking-wider transition-colors"
-          >
-            Ver perfil completo →
-          </Link>
+
+          {/* Badge dorsal */}
+          {jugador.numero != null && (
+            <div
+              className="absolute top-2.5 left-2.5 text-white font-black text-xs px-3 py-0.5 rounded-full"
+              style={{
+                background: accent,
+                boxShadow: `0 4px 12px ${accent}66`,
+              }}
+            >
+              #{jugador.numero}
+            </div>
+          )}
+        </div>
+
+        {/* INFO + STATS */}
+        <div className="px-3 pb-3 pt-2" style={{ background: '#080c18' }}>
+          {/* Nombre + equipo */}
+          <div className="text-center mb-3">
+            <div className="font-black text-lg text-white uppercase tracking-wide">
+              {nombreUp}
+            </div>
+            <div
+              className="text-[10px] font-bold uppercase mt-0.5"
+              style={{ color: accent, letterSpacing: '1.5px' }}
+            >
+              {teamNombre}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div
+            className="h-px mb-3"
+            style={{ background: `linear-gradient(90deg, transparent, ${accent}66, transparent)` }}
+          />
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-4 gap-1 mb-3">
+            {stats.map(s => (
+              <div
+                key={s.label}
+                className="relative rounded-xl py-1.5 px-1 text-center overflow-hidden"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${s.color}33`,
+                }}
+              >
+                {/* Acento superior */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-0.5 rounded-t-xl"
+                  style={{ background: s.color }}
+                />
+                <div className="text-sm mb-0.5">{s.icon}</div>
+                <div
+                  className="text-2xl font-black text-white leading-none"
+                  style={{ textShadow: `0 0 12px ${s.color}88` }}
+                >
+                  {s.total}
+                </div>
+                <div className="text-[9px] text-white/35 mt-0.5">{s.avg}/PJ</div>
+                <div
+                  className="text-[9px] font-black mt-0.5"
+                  style={{ color: s.color, letterSpacing: '0.5px' }}
+                >
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Logo liga + botón ver perfil */}
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0"
+              style={{ border: `1px solid ${accent}44` }}
+            >
+              <img src={LEAGUE_LOGO} alt="Liga" className="w-full h-full object-cover" />
+            </div>
+            <Link
+              href={`/jugador/${jugador.id}?categoria=${categoriaId}`}
+              className="flex-1 text-center py-2.5 rounded-xl text-white font-black text-xs tracking-wider transition-all"
+              style={{
+                background: `linear-gradient(90deg, ${accent}, ${accent}bb)`,
+                boxShadow: `0 4px 16px ${accent}55`,
+              }}
+            >
+              VER PERFIL COMPLETO →
+            </Link>
+          </div>
         </div>
       </div>
     </div>
