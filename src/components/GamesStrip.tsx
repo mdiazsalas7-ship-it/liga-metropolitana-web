@@ -6,7 +6,10 @@
 // - Scroll horizontal con flechas de navegación (desktop) + swipe (móvil)
 
 import Link from 'next/link';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { getDb } from '@/lib/firebase';
+import { colName, type CategoriaId } from '@/lib/categorias';
 import { TeamLogo } from './TeamLogo';
 import type { Partido, Equipo } from '@/types';
 
@@ -44,14 +47,49 @@ function diaCorto(iso?: string): string {
 }
 
 export function GamesStrip({
-  partidos,
+  partidos: partidosIniciales,
   equipos,
 }: {
   partidos: Partido[];
   equipos: Map<string, Equipo>;
 }) {
   const [activeCat, setActiveCat] = useState<string>('TODAS');
+  const [partidos, setPartidos]   = useState<Partido[]>(partidosIniciales);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Cuando el servidor re-revalida la home (cada 60s) llega un prop nuevo;
+  // sincronizamos el state local con el nuevo snapshot del server.
+  useEffect(() => {
+    setPartidos(partidosIniciales);
+  }, [partidosIniciales]);
+
+  // Suscripción en tiempo real a cada partido EN VIVO de la franja.
+  // Cuando el árbitro suma puntos en la mesa técnica, el marcador acá
+  // se actualiza solo sin esperar al revalidate del server.
+  useEffect(() => {
+    const livePartidos = partidosIniciales.filter(
+      p => p.enVivo === true && p.estatus !== 'finalizado' && p.categoria
+    );
+    if (livePartidos.length === 0) return;
+
+    const unsubs = livePartidos.map(p => {
+      const ref = doc(getDb(), colName('calendario', p.categoria as CategoriaId), p.id);
+      return onSnapshot(ref, snap => {
+        if (!snap.exists()) return;
+        const data = snap.data() as any;
+        setPartidos(prev =>
+          prev.map(x => x.id === p.id ? {
+            ...x,
+            ...data,
+            id: p.id,
+            categoria: p.categoria,
+          } : x)
+        );
+      });
+    });
+
+    return () => unsubs.forEach(u => u());
+  }, [partidosIniciales]);
 
   // Categorías presentes en los partidos
   const cats = useMemo(() => {

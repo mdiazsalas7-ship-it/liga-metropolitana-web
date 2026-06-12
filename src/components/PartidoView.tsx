@@ -91,7 +91,7 @@ export function PartidoView({
 }) {
   const [partido, setPartido] = useState<Partido>(partidoInicial);
   const [jugadas, setJugadas] = useState<JugadaPartido[]>(jugadasInicial);
-  const [stats]   = useState<StatPartido[]>(statsInicial);
+  const [stats, setStats]     = useState<StatPartido[]>(statsInicial);
 
   const [pbpOpen, setPbpOpen]               = useState(false);
   const [collapsedTeams, setCollapsedTeams] = useState<Record<string, boolean>>({});
@@ -125,6 +125,35 @@ export function PartidoView({
     );
     const unsub = onSnapshot(q, snap => {
       setJugadas(snap.docs.map(d => ({ id: d.id, ...d.data() } as JugadaPartido)));
+    });
+    return () => unsub();
+  }, [partidoInicial.id, isLive]);
+
+  // Suscripción a stats_partido para actualizar box score en tiempo real
+  useEffect(() => {
+    if (!isLive) return;
+    const q = query(
+      collection(getDb(), 'stats_partido'),
+      where('partidoId', '==', partidoInicial.id)
+    );
+    const unsub = onSnapshot(q, snap => {
+      setStats(snap.docs.map(d => {
+        const data = d.data() as any;
+        return {
+          jugadorId:   data.jugadorId,
+          nombre:      data.nombre,
+          numero:      data.numero,
+          equipo:      data.equipo,
+          equipoId:    data.equipoId,
+          fotoUrl:     data.fotoUrl,
+          dobles:      data.dobles      || 0,
+          triples:     data.triples     || 0,
+          tirosLibres: data.tirosLibres || 0,
+          rebotes:     data.rebotes     || 0,
+          robos:       data.robos       || 0,
+          bloqueos:    data.bloqueos    || 0,
+        } as StatPartido;
+      }));
     });
     return () => unsub();
   }, [partidoInicial.id, isLive]);
