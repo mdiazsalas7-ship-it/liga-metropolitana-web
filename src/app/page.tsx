@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { CATEGORIAS } from '@/lib/categorias';
 import {
-  getPartidoEnVivo, getLideres, getEquipos, getNoticias,
+  getPartidoEnVivo, getEquipos, getNoticias,
   getPartidosParaStrip, getEntrevistas,
 } from '@/lib/queries';
 import { GamesStrip } from '@/components/GamesStrip';
@@ -13,7 +13,6 @@ import { HeadlinesSidebar } from '@/components/HeadlinesSidebar';
 import { AroundLeagueList } from '@/components/AroundLeagueList';
 import { EntrevistasCarousel } from '@/components/EntrevistasCarousel';
 import { LiveScoreCard } from '@/components/LiveScoreCard';
-import { LeaderCard } from '@/components/LeaderCard';
 import { esDestacada, imagenDeNoticia } from '@/lib/noticias';
 
 export const revalidate = 60;
@@ -57,14 +56,6 @@ export default async function HomePage() {
   );
   const equiposAll = new Map();
   equiposPorCat.forEach(m => m.forEach((v, k) => equiposAll.set(k, v)));
-
-  // Top goleadores
-  let lideresPuntos: Awaited<ReturnType<typeof getLideres>> = [];
-  let categoriaLider = '';
-  for (const cat of CATEGORIAS) {
-    const res = await getLideres(cat.id, 'puntos', 3);
-    if (res.length > 0) { lideresPuntos = res; categoriaLider = cat.label; break; }
-  }
 
   // Noticia destacada: primero la marcada con `tipo: 'destacado'`,
   // si no hay, la más reciente con imagen, y si no, la primera.
@@ -128,23 +119,6 @@ export default async function HomePage() {
               linkLabel="Ver todas →"
             />
             <EntrevistasCarousel entrevistas={entrevistas} />
-          </section>
-        )}
-
-        {/* LÍDERES */}
-        {lideresPuntos.length > 0 && (
-          <section>
-            <SectionHeader
-              title="Líderes goleadores"
-              sub={`${categoriaLider} · Temporada 2026`}
-              link="/jugadores"
-              linkLabel="Ver stats →"
-            />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {lideresPuntos.map(l => (
-                <LeaderCard key={l.jugador.id} stat="puntos" lider={l} categoria={categoriaLider} />
-              ))}
-            </div>
           </section>
         )}
 

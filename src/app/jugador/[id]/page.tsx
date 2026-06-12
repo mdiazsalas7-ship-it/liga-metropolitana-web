@@ -59,7 +59,7 @@ export default async function JugadorPage({
       <p className="text-xs text-[var(--color-text-dim2)]">
         <Link href="/" className="hover:text-[var(--color-text-dim)]">Inicio</Link>
         <span className="mx-1.5">›</span>
-        <Link href={`/jugadores/${c.id}`} className="hover:text-[var(--color-text-dim)]">Stats · {c.label}</Link>
+        <Link href={`/jugadores/${c.id}`} className="hover:text-[var(--color-text-dim)]">Estadísticas · {c.label}</Link>
         <span className="mx-1.5">›</span>
         <span className="text-[var(--color-text-dim)] truncate">{j.nombre}</span>
       </p>
