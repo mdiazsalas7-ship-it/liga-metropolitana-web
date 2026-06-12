@@ -274,8 +274,8 @@ export function PartidoView({
         </div>
       </div>
 
-      {/* ÚLTIMA JUGADA */}
-      {lastJugada && (
+      {/* ÚLTIMA JUGADA (solo si está EN VIVO — en finalizados no aporta) */}
+      {isLive && lastJugada && (
         <div className="bg-white rounded-xl border border-[var(--color-border)] shadow-card p-4">
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl ${ACCIONES[lastJugada.accion]?.bg ?? 'bg-zinc-100'}`}>
