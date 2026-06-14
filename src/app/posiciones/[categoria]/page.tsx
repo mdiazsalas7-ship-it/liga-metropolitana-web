@@ -9,7 +9,6 @@ import { getEquipos, getPartidosPorCategoria } from '@/lib/queries';
 import { TeamLogo } from '@/components/TeamLogo';
 
 export const revalidate = 300;
-export const dynamic = 'force-dynamic';
 
 interface RowPos {
   equipoId: string;
@@ -23,7 +22,6 @@ interface RowPos {
 
 function calcularTabla(equipos: Map<string, any>, partidos: any[]): RowPos[] {
   const rows: Record<string, RowPos> = {};
-  // Inicializar todos los equipos
   equipos.forEach(eq => {
     rows[eq.id] = {
       equipoId: eq.id,
@@ -34,7 +32,6 @@ function calcularTabla(equipos: Map<string, any>, partidos: any[]): RowPos[] {
     };
   });
 
-  // Sumar partidos finalizados de fase regular
   partidos.forEach(p => {
     if (p.estatus !== 'finalizado') return;
     const fase = (p.fase || '').toUpperCase().trim();
@@ -87,7 +84,6 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
 
   const tabla = calcularTabla(equiposMap, partidos);
 
-  // Agrupar por grupo (A, B, etc)
   const porGrupo: Record<string, RowPos[]> = {};
   tabla.forEach(r => {
     if (!porGrupo[r.grupo]) porGrupo[r.grupo] = [];
@@ -118,8 +114,8 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
             className={
               'whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ' +
               (x.id === c.id
-                ? 'bg-liga-dark border border-liga-dark text-white'
-                : 'bg-white border border-[var(--color-border)] text-[var(--color-text-dim)] hover:bg-[var(--color-bg)]')
+                ? 'bg-liga-coral border border-liga-coral text-white'
+                : 'bg-[var(--color-card)] border border-[var(--color-border)] text-[var(--color-text-dim)] hover:bg-[var(--color-card-2)]')
             }>
             {x.label}
           </Link>
@@ -127,7 +123,7 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
       </div>
 
       {tabla.length === 0 ? (
-        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-white shadow-card">
+        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card">
           <p className="text-sm text-[var(--color-text-dim)]">Sin equipos cargados para {c.label}.</p>
         </div>
       ) : (
@@ -138,7 +134,7 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
                 Grupo {g}
               </h2>
             )}
-            <div className="rounded-xl border border-[var(--color-border)] bg-white shadow-card overflow-x-auto">
+            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold border-b border-[var(--color-border)]">
@@ -155,8 +151,10 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
                 </thead>
                 <tbody>
                   {porGrupo[g].map((r, i) => (
-                    <tr key={r.equipoId} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-bg)] transition-colors">
-                      <td className="py-2.5 px-3 font-bold text-[var(--color-text-dim)] tabular-nums">{i + 1}</td>
+                    <tr key={r.equipoId} className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-card-2)] transition-colors">
+                      <td className="py-2.5 px-3 font-bold text-[var(--color-text-dim)] tabular-nums">
+                        {i < 4 ? <span className="text-liga-coral">{i + 1}</span> : i + 1}
+                      </td>
                       <td className="py-2.5">
                         <Link href={`/equipo/${r.equipoId}?categoria=${c.id}`} className="flex items-center gap-2.5 min-w-0">
                           <TeamLogo nombre={r.nombre} logoUrl={r.logoUrl} size={28} />
@@ -164,11 +162,11 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
                         </Link>
                       </td>
                       <td className="py-2.5 px-2 text-center tabular-nums text-[var(--color-text-dim)]">{r.pj}</td>
-                      <td className="py-2.5 px-2 text-center tabular-nums text-emerald-400">{r.g}</td>
-                      <td className="py-2.5 px-2 text-center tabular-nums text-red-400">{r.p}</td>
+                      <td className="py-2.5 px-2 text-center tabular-nums text-liga-final">{r.g}</td>
+                      <td className="py-2.5 px-2 text-center tabular-nums text-liga-live">{r.p}</td>
                       <td className="py-2.5 px-2 text-center tabular-nums hidden sm:table-cell">{r.pf}</td>
                       <td className="py-2.5 px-2 text-center tabular-nums hidden sm:table-cell">{r.pc}</td>
-                      <td className={'py-2.5 px-2 text-center tabular-nums font-semibold ' + (r.dif > 0 ? 'text-emerald-400' : r.dif < 0 ? 'text-red-400' : 'text-[var(--color-text-dim)]')}>
+                      <td className={'py-2.5 px-2 text-center tabular-nums font-semibold ' + (r.dif > 0 ? 'text-liga-final' : r.dif < 0 ? 'text-liga-live' : 'text-[var(--color-text-dim)]')}>
                         {r.dif > 0 ? '+' : ''}{r.dif}
                       </td>
                       <td className="py-2.5 px-3 text-right tabular-nums font-extrabold text-liga-gold">{r.pts}</td>

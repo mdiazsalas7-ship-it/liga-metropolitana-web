@@ -1,40 +1,29 @@
-// Listado completo de entrevistas/videos.
-// Server side: trae todos los videos. Cliente: maneja el modal.
+// Página de Entrevistas/Videos: grilla completa.
 
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getEntrevistas } from '@/lib/queries';
 import { EntrevistasGrid } from '@/components/EntrevistasGrid';
 
 export const revalidate = 60;
-export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Entrevistas y Videos',
-  description: 'Entrevistas, jugadas destacadas y videos de la Liga Metropolitana Eje Este.',
+  title: 'Videos',
+  description: 'Entrevistas y videos de la Liga Metropolitana Eje Este.',
 };
 
 export default async function EntrevistasPage() {
-  const entrevistas = await getEntrevistas(50);
+  const entrevistas = await getEntrevistas(60);
 
   return (
     <div className="space-y-6">
-      <p className="text-xs text-[var(--color-text-dim2)]">
-        <Link href="/" className="hover:text-[var(--color-text-dim)]">Inicio</Link>
-        <span className="mx-1.5">›</span>
-        <span className="text-[var(--color-text-dim)]">Entrevistas</span>
-      </p>
-
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold">Entrevistas y Videos</h1>
-        <p className="text-sm text-[var(--color-text-dim)] mt-1">
-          {entrevistas.length} {entrevistas.length === 1 ? 'video' : 'videos'} disponibles
-        </p>
+      <div className="border-b-2 border-liga-coral pb-2">
+        <h1 className="text-2xl sm:text-3xl font-extrabold">Videos y entrevistas</h1>
+        <p className="text-sm text-[var(--color-text-dim)] mt-1">Lo último de la liga en cámara</p>
       </div>
 
       {entrevistas.length === 0 ? (
-        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-white shadow-card">
-          <p className="text-sm text-[var(--color-text-dim)]">Aún no hay videos publicados.</p>
+        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card">
+          <p className="text-sm text-[var(--color-text-dim)]">Todavía no hay videos publicados.</p>
         </div>
       ) : (
         <EntrevistasGrid entrevistas={entrevistas} />

@@ -1,15 +1,16 @@
+// Página de Noticias: grid de todos los artículos.
+
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getTodasNoticias } from '@/lib/queries';
+import { imagenDeNoticia, cuerpoDeNoticia, esDestacada } from '@/lib/noticias';
 import { fechaRelativa } from '@/lib/fechas';
-import { imagenDeNoticia, cuerpoDeNoticia } from '@/lib/noticias';
 
 export const revalidate = 60;
-export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Noticias',
-  description: 'Noticias y actualizaciones de la Liga Metropolitana Eje Este.',
+  description: 'Últimas noticias de la Liga Metropolitana Eje Este.',
 };
 
 export default async function NoticiasPage() {
@@ -17,47 +18,52 @@ export default async function NoticiasPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-xs text-[var(--color-text-dim2)]">
-        <Link href="/" className="hover:text-[var(--color-text-dim)]">Inicio</Link>
-        <span className="mx-1.5">›</span>
-        <span className="text-[var(--color-text-dim)]">Noticias</span>
-      </p>
-
-      <div>
+      <div className="border-b-2 border-liga-coral pb-2">
         <h1 className="text-2xl sm:text-3xl font-extrabold">Noticias</h1>
-        <p className="text-sm text-[var(--color-text-dim)] mt-1">
-          {noticias.length} {noticias.length === 1 ? 'publicación' : 'publicaciones'}
-        </p>
+        <p className="text-sm text-[var(--color-text-dim)] mt-1">Lo último de la liga</p>
       </div>
 
       {noticias.length === 0 ? (
-        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-white shadow-card">
-          <p className="text-sm text-[var(--color-text-dim)]">Sin noticias publicadas todavía.</p>
+        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card">
+          <p className="text-sm text-[var(--color-text-dim)]">Todavía no hay noticias publicadas.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {noticias.map(n => {
             const img    = imagenDeNoticia(n);
             const cuerpo = cuerpoDeNoticia(n);
+            const dest   = esDestacada(n);
             return (
-              <article key={n.id} className="bg-white rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden card-hover">
-                {img && (
-                  <img
-                    src={img}
-                    alt={n.titulo}
-                    className="w-full h-48 sm:h-56 object-cover"
-                  />
-                )}
-                <div className="p-5">
-                  {n.fecha && (
-                    <p className="text-[10px] uppercase tracking-wider text-liga-coral mb-2 font-extrabold">
-                      {fechaRelativa(n.fecha)}
+              <article
+                key={n.id}
+                className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl shadow-card card-hover overflow-hidden flex flex-col"
+              >
+                <div className="relative aspect-video bg-[var(--color-bg-alt)]">
+                  {img ? (
+                    <img src={img} alt={n.titulo} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--color-navy)] to-[var(--color-bg-alt)]">
+                      <span className="text-3xl">📰</span>
+                    </div>
+                  )}
+                  {dest && (
+                    <span className="absolute top-2.5 left-2.5 bg-liga-coral text-white text-[9px] font-extrabold tracking-[0.14em] uppercase px-2 py-0.5 rounded">
+                      Destacado
+                    </span>
+                  )}
+                </div>
+                <div className="p-4 flex flex-col flex-1">
+                  <h2 className="text-sm sm:text-base font-extrabold leading-tight text-[var(--color-text)] line-clamp-2">
+                    {n.titulo}
+                  </h2>
+                  {cuerpo && (
+                    <p className="text-xs sm:text-sm text-[var(--color-text-dim)] mt-2 line-clamp-3 leading-relaxed flex-1">
+                      {cuerpo}
                     </p>
                   )}
-                  <h2 className="text-lg font-extrabold leading-snug mb-2 text-[var(--color-text)]">{n.titulo}</h2>
-                  {cuerpo && (
-                    <p className="text-sm text-[var(--color-text-dim)] leading-relaxed whitespace-pre-wrap">
-                      {cuerpo}
+                  {n.fecha && (
+                    <p className="text-[10px] text-[var(--color-text-dim2)] mt-3 font-bold uppercase tracking-wider">
+                      {fechaRelativa(n.fecha)}
                     </p>
                   )}
                 </div>

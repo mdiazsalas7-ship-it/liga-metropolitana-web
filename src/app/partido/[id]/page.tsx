@@ -16,7 +16,6 @@ import { ShareButton } from '@/components/ShareButton';
 import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 30;
 
 const CAT_LABELS: Record<string, string> = {
   INTERINDUSTRIAL: 'Interindustrial',
@@ -60,7 +59,6 @@ export default async function PartidoPage({
   params: { id: string };
   searchParams: { categoria?: string };
 }) {
-  // La categoría viene como query param desde los links (?categoria=U16M)
   const cat = CATEGORIAS.find(c => c.id === searchParams.categoria);
   if (!cat) notFound();
   const c = cat!;
@@ -73,23 +71,24 @@ export default async function PartidoPage({
   ]);
 
   if (!partido) notFound();
-  // Después del notFound, partido existe (notFound throws).
   const p = partido!;
 
-  const shareTitle = `${p.equipoLocalNombre} ${p.marcadorLocal ?? 0} - ${p.marcadorVisitante ?? 0} ${p.equipoVisitanteNombre}`;
+  const local = p.equipoLocalNombre ?? 'Local';
+  const visit = p.equipoVisitanteNombre ?? 'Visitante';
+  const shareTitle = `${local} ${p.marcadorLocal ?? 0} - ${p.marcadorVisitante ?? 0} ${visit}`;
   const shareUrl   = `${SITE_URL}/partido/${p.id}?categoria=${c.id}`;
 
   return (
     <div className="space-y-6">
       {/* Breadcrumb + compartir */}
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs text-[var(--color-text-dim2)] min-w-0">
+        <p className="text-xs text-[var(--color-text-dim2)] min-w-0 truncate">
           <Link href="/" className="hover:text-[var(--color-text-dim)]">Inicio</Link>
           <span className="mx-1.5">›</span>
           <Link href={`/calendario/${c.id}`} className="hover:text-[var(--color-text-dim)]">{c.label}</Link>
           <span className="mx-1.5">›</span>
           <span className="text-[var(--color-text-dim)]">
-            vs
+            {local} vs {visit}
           </span>
         </p>
         <ShareButton

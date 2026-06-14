@@ -57,15 +57,11 @@ export function GamesStrip({
   const [partidos, setPartidos]   = useState<Partido[]>(partidosIniciales);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Cuando el servidor re-revalida la home (cada 60s) llega un prop nuevo;
-  // sincronizamos el state local con el nuevo snapshot del server.
   useEffect(() => {
     setPartidos(partidosIniciales);
   }, [partidosIniciales]);
 
   // Suscripción en tiempo real a cada partido EN VIVO de la franja.
-  // Cuando el árbitro suma puntos en la mesa técnica, el marcador acá
-  // se actualiza solo sin esperar al revalidate del server.
   useEffect(() => {
     const livePartidos = partidosIniciales.filter(
       p => p.enVivo === true && p.estatus !== 'finalizado' && p.categoria
@@ -91,20 +87,17 @@ export function GamesStrip({
     return () => unsubs.forEach(u => u());
   }, [partidosIniciales]);
 
-  // Categorías presentes en los partidos
   const cats = useMemo(() => {
     const set = new Set<string>();
     partidos.forEach(p => p.categoria && set.add(p.categoria));
     return Array.from(set);
   }, [partidos]);
 
-  // Filtrar por categoría seleccionada
   const filtered = useMemo(() => {
     if (activeCat === 'TODAS') return partidos;
     return partidos.filter(p => p.categoria === activeCat);
   }, [partidos, activeCat]);
 
-  // Ordenar: EN VIVO primero, luego próximos (asc), luego finalizados (desc)
   const ordered = useMemo(() => {
     const live = filtered.filter(p => p.enVivo === true && p.estatus !== 'finalizado');
     const next = filtered
@@ -124,7 +117,6 @@ export function GamesStrip({
     return [...live, ...next, ...done];
   }, [filtered]);
 
-  // Contar partidos por categoría para los badges
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
     partidos.forEach(p => {
@@ -133,7 +125,6 @@ export function GamesStrip({
     return c;
   }, [partidos]);
 
-  // Contar EN VIVO global (siempre visible en chip "Todas")
   const liveCount = useMemo(
     () => partidos.filter(p => p.enVivo === true && p.estatus !== 'finalizado').length,
     [partidos]
@@ -148,7 +139,7 @@ export function GamesStrip({
   if (partidos.length === 0) return null;
 
   return (
-    <div className="bg-liga-dark border-b border-white/5">
+    <div className="bg-gradient-to-b from-[var(--color-bg-alt)] to-[var(--color-bg)] border-b border-[var(--color-border)]">
       <div className="mx-auto max-w-6xl">
 
         {/* Selector de categorías */}
@@ -156,10 +147,10 @@ export function GamesStrip({
           <button
             onClick={() => setActiveCat('TODAS')}
             className={
-              'whitespace-nowrap rounded-md px-3 py-1.5 text-[10px] font-extrabold tracking-widest uppercase transition-colors flex items-center gap-1.5 ' +
+              'whitespace-nowrap rounded-md px-3 py-1.5 text-[10px] font-extrabold tracking-[0.13em] uppercase transition-colors flex items-center gap-1.5 ' +
               (activeCat === 'TODAS'
                 ? 'bg-liga-coral text-white'
-                : 'text-zinc-400 hover:text-white hover:bg-white/10')
+                : 'text-[var(--color-text-dim)] hover:text-white hover:bg-white/10')
             }
           >
             Todas
@@ -179,16 +170,16 @@ export function GamesStrip({
                 key={cat}
                 onClick={() => setActiveCat(cat)}
                 className={
-                  'whitespace-nowrap rounded-md px-3 py-1.5 text-[10px] font-extrabold tracking-widest uppercase transition-colors ' +
+                  'whitespace-nowrap rounded-md px-3 py-1.5 text-[10px] font-extrabold tracking-[0.13em] uppercase transition-colors ' +
                   (active
                     ? 'bg-liga-coral text-white'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/10')
+                    : 'text-[var(--color-text-dim)] hover:text-white hover:bg-white/10')
                 }
               >
                 {CAT_FULL[cat] ?? cat}
                 <span className={
                   'ml-1.5 text-[9px] ' +
-                  (active ? 'text-white/70' : 'text-zinc-500')
+                  (active ? 'text-white/70' : 'text-[var(--color-text-dim2)]')
                 }>
                   {counts[cat] ?? 0}
                 </span>
@@ -199,29 +190,27 @@ export function GamesStrip({
 
         {/* Strip con flechas de scroll */}
         <div className="relative">
-          {/* Flecha izquierda (solo desktop) */}
           <button
             onClick={() => scrollBy(-1)}
-            className="hidden sm:flex absolute left-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 items-center justify-center text-white shadow-lg"
-            aria-label="Anterior"
+            className="hidden sm:flex absolute left-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[var(--color-card-2)] hover:bg-liga-coral border border-[var(--color-border-strong)] hover:border-liga-coral items-center justify-center text-white shadow-lg transition-colors"
+            aria-label="Partidos anteriores"
           >
             ‹
           </button>
           <button
             onClick={() => scrollBy(1)}
-            className="hidden sm:flex absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 items-center justify-center text-white shadow-lg"
-            aria-label="Siguiente"
+            className="hidden sm:flex absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[var(--color-card-2)] hover:bg-liga-coral border border-[var(--color-border-strong)] hover:border-liga-coral items-center justify-center text-white shadow-lg transition-colors"
+            aria-label="Partidos siguientes"
           >
             ›
           </button>
 
-          {/* Strip de partidos */}
           <div
             ref={scrollRef}
-            className="flex gap-2 overflow-x-auto no-scrollbar px-4 sm:px-12 py-2"
+            className="flex gap-2 overflow-x-auto no-scrollbar px-4 sm:px-12 py-2.5"
           >
             {ordered.length === 0 ? (
-              <div className="flex-1 text-center py-3 text-xs text-zinc-500 font-bold">
+              <div className="flex-1 text-center py-3 text-xs text-[var(--color-text-dim2)] font-bold">
                 Sin partidos en {CAT_FULL[activeCat] ?? activeCat}
               </div>
             ) : ordered.map(p => {
@@ -239,45 +228,45 @@ export function GamesStrip({
                   key={p.id}
                   href={`/partido/${p.id}?categoria=${cat}`}
                   className={
-                    'flex-shrink-0 w-[200px] rounded-md border transition-colors px-3 py-2 ' +
+                    'flex-shrink-0 w-[205px] rounded-xl border transition-all px-3 py-2.5 hover:-translate-y-0.5 ' +
                     (isLive
-                      ? 'bg-liga-live/15 border-liga-live hover:bg-liga-live/25'
-                      : 'bg-zinc-900 border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700')
+                      ? 'bg-liga-liveSoft border-liga-live/50 hover:border-liga-live'
+                      : 'bg-[var(--color-card)] border-[var(--color-border)] hover:bg-[var(--color-card-2)] hover:border-[var(--color-border-strong)]')
                   }
                 >
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-2">
                     {isLive ? (
-                      <span className="text-[9px] font-extrabold text-liga-live tracking-widest flex items-center gap-1">
+                      <span className="text-[9px] font-extrabold text-liga-live tracking-[0.14em] flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-liga-live pulse-live" /> LIVE
                       </span>
                     ) : isFinal ? (
-                      <span className="text-[9px] font-extrabold text-zinc-500 tracking-widest">
+                      <span className="text-[9px] font-extrabold text-[var(--color-text-dim2)] tracking-[0.14em]">
                         FINAL
                       </span>
                     ) : (
-                      <span className="text-[9px] font-extrabold text-zinc-400 tracking-widest">
+                      <span className="text-[9px] font-extrabold text-[var(--color-text-dim)] tracking-[0.14em]">
                         {diaCorto(p.fechaAsignada)}{p.hora ? ` · ${p.hora}` : ''}
                       </span>
                     )}
-                    <span className="text-[9px] font-bold text-zinc-500 tracking-widest">
+                    <span className="text-[9px] font-bold text-[var(--color-text-dim2)] tracking-[0.06em]">
                       {CAT_LABELS[cat] ?? cat}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between gap-1.5 mb-0.5">
+                  <div className="flex items-center justify-between gap-1.5 mb-1">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <TeamLogo nombre={p.equipoLocalNombre} logoUrl={logoL} size={20} />
                       <span className={
                         'text-[11px] font-bold truncate ' +
-                        (isFinal && !localGana ? 'text-zinc-500' : 'text-white')
+                        (isFinal && !localGana ? 'text-[var(--color-text-dim2)]' : 'text-white')
                       }>
                         {p.equipoLocalNombre}
                       </span>
                     </div>
                     {(isLive || isFinal) && (
                       <span className={
-                        'text-sm font-extrabold tabular-nums ' +
-                        (isFinal && !localGana ? 'text-zinc-500' : 'text-white')
+                        'cond text-base font-extrabold tabular-nums ' +
+                        (isFinal && !localGana ? 'text-[var(--color-text-dim2)]' : 'text-white')
                       }>
                         {ml}
                       </span>
@@ -289,15 +278,15 @@ export function GamesStrip({
                       <TeamLogo nombre={p.equipoVisitanteNombre} logoUrl={logoV} size={20} />
                       <span className={
                         'text-[11px] font-bold truncate ' +
-                        (isFinal && localGana ? 'text-zinc-500' : 'text-white')
+                        (isFinal && localGana ? 'text-[var(--color-text-dim2)]' : 'text-white')
                       }>
                         {p.equipoVisitanteNombre}
                       </span>
                     </div>
                     {(isLive || isFinal) && (
                       <span className={
-                        'text-sm font-extrabold tabular-nums ' +
-                        (isFinal && localGana ? 'text-zinc-500' : 'text-white')
+                        'cond text-base font-extrabold tabular-nums ' +
+                        (isFinal && localGana ? 'text-[var(--color-text-dim2)]' : 'text-white')
                       }>
                         {mv}
                       </span>
@@ -307,11 +296,10 @@ export function GamesStrip({
               );
             })}
 
-            {/* "Ver todos" al final */}
             {ordered.length > 0 && (
               <Link
                 href={activeCat === 'TODAS' ? '/calendario' : `/calendario/${activeCat}`}
-                className="flex-shrink-0 flex items-center justify-center px-4 text-[10px] font-extrabold text-zinc-400 hover:text-white tracking-widest uppercase whitespace-nowrap rounded-md hover:bg-white/5"
+                className="flex-shrink-0 flex items-center justify-center px-4 text-[10px] font-extrabold text-[var(--color-text-dim)] hover:text-white tracking-[0.1em] uppercase whitespace-nowrap rounded-md hover:bg-white/5"
               >
                 Ver todos →
               </Link>

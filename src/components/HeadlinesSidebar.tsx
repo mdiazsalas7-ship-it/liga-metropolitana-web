@@ -9,9 +9,9 @@ export function HeadlinesSidebar({ noticias }: { noticias: Noticia[] }) {
   if (noticias.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-zinc-50">
-        <h2 className="text-xs font-extrabold tracking-widest text-[var(--color-text)] uppercase">
+    <div className="bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg-alt)]">
+        <h2 className="text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase">
           Headlines
         </h2>
         <Link href="/noticias" className="text-[10px] text-liga-coral font-extrabold hover:underline">
@@ -25,14 +25,16 @@ export function HeadlinesSidebar({ noticias }: { noticias: Noticia[] }) {
             <li key={n.id}>
               <Link
                 href="/noticias"
-                className="flex items-start gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors"
+                className="flex items-start gap-3 px-4 py-3 hover:bg-[var(--color-card-2)] transition-colors"
               >
-                {img && (
+                {img ? (
                   <img
                     src={img}
                     alt=""
                     className="w-14 h-14 rounded object-cover flex-shrink-0"
                   />
+                ) : (
+                  <div className="w-14 h-14 rounded flex-shrink-0 bg-liga-coralSoft flex items-center justify-center text-lg">📰</div>
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-extrabold leading-tight text-[var(--color-text)] line-clamp-2">

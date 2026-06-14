@@ -1,71 +1,10 @@
 'use client';
 
-// Grid completo para la página /entrevistas. Reutiliza el VideoModal.
+// Grid completo para la página /entrevistas. Reutiliza el VideoModal compartido.
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Entrevista } from '@/types';
-
-function fechaShow(s?: string): string {
-  if (!s || typeof s !== 'string') return '';
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
-  if (m) {
-    const day = parseInt(m[1]);
-    const mon = parseInt(m[2]);
-    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-    return `${day} ${meses[mon - 1] ?? ''}`;
-  }
-  return s;
-}
-
-function VideoModal({ entrevista, onClose }: { entrevista: Entrevista; onClose: () => void }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', onKey);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
-    };
-  }, [onClose]);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in"
-      style={{ background: 'rgba(0, 0, 0, 0.9)' }}
-      onClick={onClose}
-    >
-      <div
-        className="relative bg-black rounded-xl overflow-hidden w-full max-w-4xl shadow-2xl"
-        onClick={e => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white font-bold text-xl flex items-center justify-center backdrop-blur"
-          aria-label="Cerrar"
-        >
-          ×
-        </button>
-
-        <div className="aspect-video w-full bg-black">
-          <video
-            src={entrevista.videoUrl}
-            controls
-            autoPlay
-            playsInline
-            className="w-full h-full object-contain"
-          />
-        </div>
-
-        <div className="bg-liga-dark text-white px-5 py-3">
-          <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">
-            {fechaShow(entrevista.fecha)}
-          </p>
-          <h3 className="text-base sm:text-lg font-extrabold mt-0.5">{entrevista.titulo}</h3>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { VideoModal, fechaShow } from './VideoModal';
 
 export function EntrevistasGrid({ entrevistas }: { entrevistas: Entrevista[] }) {
   const [selected, setSelected] = useState<Entrevista | null>(null);
@@ -79,7 +18,7 @@ export function EntrevistasGrid({ entrevistas }: { entrevistas: Entrevista[] }) 
             onClick={() => setSelected(v)}
             className="text-left group"
           >
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 shadow-card">
+            <div className="relative aspect-video rounded-xl overflow-hidden bg-black shadow-card">
               {v.thumbnailUrl ? (
                 <img
                   src={v.thumbnailUrl}
@@ -101,7 +40,7 @@ export function EntrevistasGrid({ entrevistas }: { entrevistas: Entrevista[] }) 
                   <span className="text-liga-dark group-hover:text-white text-2xl ml-1">▶</span>
                 </div>
               </div>
-              <span className="absolute top-2.5 left-2.5 bg-liga-coral text-white text-[9px] font-extrabold tracking-widest uppercase px-2 py-0.5 rounded">
+              <span className="absolute top-2.5 left-2.5 bg-liga-coral text-white text-[9px] font-extrabold tracking-[0.14em] uppercase px-2 py-0.5 rounded">
                 Video
               </span>
             </div>
@@ -119,9 +58,7 @@ export function EntrevistasGrid({ entrevistas }: { entrevistas: Entrevista[] }) 
         ))}
       </div>
 
-      {selected && (
-        <VideoModal entrevista={selected} onClose={() => setSelected(null)} />
-      )}
+      {selected && <VideoModal entrevista={selected} onClose={() => setSelected(null)} />}
     </>
   );
 }

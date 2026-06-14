@@ -12,13 +12,13 @@ import type { Partido, Equipo } from '@/types';
 import type { StatPartido, JugadaPartido } from '@/lib/queries';
 
 const ACCIONES: Record<string, { label: string; icon: string; bg: string; fg: string }> = {
-  tirosLibres: { label: 'Tiro Libre',  icon: '🎯', bg: 'bg-zinc-100',     fg: 'text-zinc-700' },
-  dobles:      { label: 'Doble',       icon: '🏀', bg: 'bg-blue-100',     fg: 'text-blue-700' },
-  triples:     { label: 'Triple',      icon: '🔥', bg: 'bg-purple-100',   fg: 'text-purple-700' },
-  rebotes:     { label: 'Rebote',      icon: '🖐️', bg: 'bg-emerald-100',  fg: 'text-emerald-700' },
-  robos:       { label: 'Robo',        icon: '🛡️', bg: 'bg-amber-100',    fg: 'text-amber-700' },
-  bloqueos:    { label: 'Bloqueo',     icon: '🚫', bg: 'bg-red-100',      fg: 'text-red-700' },
-  sustitucion: { label: 'Cambio',      icon: '🔄', bg: 'bg-purple-50',    fg: 'text-purple-700' },
+  tirosLibres: { label: 'Tiro Libre',  icon: '🎯', bg: 'bg-zinc-500/15',    fg: 'text-zinc-300' },
+  dobles:      { label: 'Doble',       icon: '🏀', bg: 'bg-blue-500/15',    fg: 'text-blue-300' },
+  triples:     { label: 'Triple',      icon: '🔥', bg: 'bg-purple-500/15',  fg: 'text-purple-300' },
+  rebotes:     { label: 'Rebote',      icon: '🖐️', bg: 'bg-emerald-500/15', fg: 'text-emerald-300' },
+  robos:       { label: 'Robo',        icon: '🛡️', bg: 'bg-amber-500/15',   fg: 'text-amber-300' },
+  bloqueos:    { label: 'Bloqueo',     icon: '🚫', bg: 'bg-red-500/15',     fg: 'text-red-300' },
+  sustitucion: { label: 'Cambio',      icon: '🔄', bg: 'bg-purple-500/15',  fg: 'text-purple-300' },
 };
 
 const CAT_LABELS: Record<string, string> = {
@@ -45,7 +45,6 @@ interface BoxRow {
   triples: number; dobles: number; tl: number;
 }
 
-/** Filtra stats por equipo usando nombre o id (igual que la app vieja). */
 function statsDelEquipo(stats: StatPartido[], teamName?: string, teamId?: string): StatPartido[] {
   const targetName = (teamName || '').trim().toUpperCase();
   return stats.filter(s => {
@@ -129,7 +128,6 @@ export function PartidoView({
     return () => unsub();
   }, [partidoInicial.id, isLive]);
 
-  // Suscripción a stats_partido para actualizar box score en tiempo real
   useEffect(() => {
     if (!isLive) return;
     const q = query(
@@ -158,7 +156,6 @@ export function PartidoView({
     return () => unsub();
   }, [partidoInicial.id, isLive]);
 
-  // Filtrado por NOMBRE/ID del equipo (no por 'local'/'visitante')
   const statsLocal = useMemo(
     () => statsDelEquipo(stats, partido.equipoLocalNombre, partido.equipoLocalId),
     [stats, partido.equipoLocalNombre, partido.equipoLocalId]
@@ -173,7 +170,6 @@ export function PartidoView({
   const totalsLocal = useMemo(() => totalsOf(boxLocal),  [boxLocal]);
   const totalsVisit = useMemo(() => totalsOf(boxVisita), [boxVisita]);
 
-  // Top performers: ahora calcula correctamente
   const topPerformers = useMemo(() => {
     return [...boxLocal, ...boxVisita].sort((a, b) => b.pts - a.pts).slice(0, 3);
   }, [boxLocal, boxVisita]);
@@ -193,26 +189,26 @@ export function PartidoView({
     <div className="space-y-6">
       {/* MARCADOR */}
       <div className={
-        'rounded-2xl bg-white shadow-card overflow-hidden border-2 ' +
-        (isLive ? 'border-liga-coral' : isFinal ? 'border-liga-final' : 'border-[var(--color-border)]')
+        'rounded-2xl bg-[var(--color-card)] shadow-card overflow-hidden border-2 ' +
+        (isLive ? 'border-liga-coral' : isFinal ? 'border-liga-final/60' : 'border-[var(--color-border)]')
       }>
         {/* Top bar */}
         <div className={
           'flex items-center justify-between px-5 py-2.5 border-b ' +
-          (isLive ? 'bg-liga-coralSoft border-liga-coral/20' : isFinal ? 'bg-liga-finalSoft border-liga-final/20' : 'bg-[var(--color-bg)] border-[var(--color-border)]')
+          (isLive ? 'bg-liga-coralSoft border-liga-coral/20' : isFinal ? 'bg-liga-finalSoft border-liga-final/20' : 'bg-[var(--color-bg-alt)] border-[var(--color-border)]')
         }>
           <div className="flex items-center gap-2">
             {isLive && (
               <>
                 <span className="w-2 h-2 rounded-full bg-liga-live pulse-live" />
-                <span className="text-[11px] font-extrabold text-liga-live tracking-widest uppercase">En vivo · {cuarto}</span>
+                <span className="text-[11px] font-extrabold text-liga-live tracking-[0.13em] uppercase">En vivo · {cuarto}</span>
               </>
             )}
             {isFinal && (
-              <span className="text-[11px] font-extrabold text-liga-final tracking-widest uppercase">🏁 Final</span>
+              <span className="text-[11px] font-extrabold text-liga-final tracking-[0.13em] uppercase">🏁 Final</span>
             )}
             {!isLive && !isFinal && (
-              <span className="text-[11px] font-extrabold text-[var(--color-text-dim)] tracking-widest uppercase">
+              <span className="text-[11px] font-extrabold text-[var(--color-text-dim)] tracking-[0.13em] uppercase">
                 Programado{partido.hora ? ` · ${partido.hora}` : ''}
               </span>
             )}
@@ -224,7 +220,7 @@ export function PartidoView({
           </span>
         </div>
 
-        {/* Marcador — layout vertical estilo ESPN scoreboard */}
+        {/* Marcador */}
         <div className="px-4 sm:px-6 py-5">
           {/* Local */}
           <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 sm:gap-4 py-2">
@@ -236,15 +232,14 @@ export function PartidoView({
               {local}
             </p>
             <span className={
-              'text-4xl sm:text-6xl font-extrabold tabular-nums leading-none transition-transform ' +
+              'cond text-5xl sm:text-7xl font-black tabular-nums leading-none transition-transform ' +
               (pulse ? 'scale-110 ' : '') +
-              (isFinal && !localGana ? 'text-[var(--color-text-dim)]' : 'text-[var(--color-text)]')
+              (isFinal && !localGana ? 'text-[var(--color-text-dim2)]' : 'text-[var(--color-text)]')
             }>
               {ml}
             </span>
           </div>
 
-          {/* Separator */}
           <div className="h-px bg-[var(--color-border)] my-2" />
 
           {/* Visitante */}
@@ -257,9 +252,9 @@ export function PartidoView({
               {visit}
             </p>
             <span className={
-              'text-4xl sm:text-6xl font-extrabold tabular-nums leading-none transition-transform ' +
+              'cond text-5xl sm:text-7xl font-black tabular-nums leading-none transition-transform ' +
               (pulse ? 'scale-110 ' : '') +
-              (isFinal && localGana ? 'text-[var(--color-text-dim)]' : 'text-[var(--color-text)]')
+              (isFinal && localGana ? 'text-[var(--color-text-dim2)]' : 'text-[var(--color-text)]')
             }>
               {mv}
             </span>
@@ -303,21 +298,21 @@ export function PartidoView({
         </div>
       </div>
 
-      {/* ÚLTIMA JUGADA (solo si está EN VIVO — en finalizados no aporta) */}
+      {/* ÚLTIMA JUGADA */}
       {isLive && lastJugada && (
-        <div className="bg-white rounded-xl border border-[var(--color-border)] shadow-card p-4">
+        <div className="bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] shadow-card p-4">
           <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl ${ACCIONES[lastJugada.accion]?.bg ?? 'bg-zinc-100'}`}>
+            <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl ${ACCIONES[lastJugada.accion]?.bg ?? 'bg-zinc-500/15'}`}>
               {ACCIONES[lastJugada.accion]?.icon ?? '🏀'}
             </div>
             <div className="flex-1 min-w-0">
               {lastJugada.accion === 'sustitucion' ? (
                 <>
-                  <p className="text-[10px] font-extrabold tracking-widest text-purple-700 uppercase">Cambio</p>
+                  <p className="text-[10px] font-extrabold tracking-[0.13em] text-purple-300 uppercase">Cambio</p>
                   <p className="text-xs mt-0.5">
-                    <span className="text-red-600">↓ #{lastJugada.jugadorSaleNumero} {lastJugada.jugadorSaleNombre}</span>
+                    <span className="text-red-400">↓ #{lastJugada.jugadorSaleNumero} {lastJugada.jugadorSaleNombre}</span>
                     <span className="mx-2 text-[var(--color-text-dim2)]">·</span>
-                    <span className="text-emerald-600">↑ #{lastJugada.jugadorNumero} {lastJugada.jugadorNombre}</span>
+                    <span className="text-emerald-400">↑ #{lastJugada.jugadorNumero} {lastJugada.jugadorNombre}</span>
                   </p>
                 </>
               ) : (
@@ -325,7 +320,7 @@ export function PartidoView({
                   <p className="text-sm font-extrabold text-[var(--color-text)]">#{lastJugada.jugadorNumero} {lastJugada.jugadorNombre}</p>
                   <p className="text-[11px] text-[var(--color-text-dim)]">
                     Última jugada · {ACCIONES[lastJugada.accion]?.label ?? lastJugada.accion}
-                    {lastJugada.puntos > 0 && <span className="text-emerald-600 font-extrabold ml-1">+{lastJugada.puntos}</span>}
+                    {lastJugada.puntos > 0 && <span className="text-emerald-400 font-extrabold ml-1">+{lastJugada.puntos}</span>}
                     {lastJugada.cuarto && <span className="ml-2 text-[var(--color-text-dim2)]">· {lastJugada.cuarto}</span>}
                   </p>
                 </>
@@ -333,7 +328,7 @@ export function PartidoView({
             </div>
             <span className={
               'text-[10px] font-extrabold px-2.5 py-1 rounded-full flex-shrink-0 ' +
-              (lastJugada.equipo === 'local' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700')
+              (lastJugada.equipo === 'local' ? 'bg-blue-500/20 text-blue-300' : 'bg-red-500/20 text-red-300')
             }>
               {(lastJugada.equipo === 'local' ? local : visit).slice(0, 12)}
             </span>
@@ -344,17 +339,17 @@ export function PartidoView({
       {/* TOP PERFORMERS */}
       {topPerformers.length > 0 && (
         <section>
-          <h2 className="text-xs font-extrabold tracking-widest text-[var(--color-text)] uppercase mb-3 border-b-2 border-liga-coral pb-2">
+          <h2 className="text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase mb-3 border-b-2 border-liga-coral pb-2">
             Mejores del partido
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {topPerformers.map((p, idx) => (
-              <div key={p.jugadorId} className="bg-white rounded-xl border border-[var(--color-border)] shadow-card p-4">
+              <div key={p.jugadorId} className="bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] shadow-card p-4">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-extrabold tracking-widest text-liga-gold uppercase">
+                  <span className="text-[10px] font-extrabold tracking-[0.13em] text-liga-gold uppercase">
                     {idx === 0 ? '⭐ MVP' : `#${idx + 1}`}
                   </span>
-                  <span className="text-3xl font-extrabold text-liga-coral tabular-nums leading-none">{p.pts}</span>
+                  <span className="cond text-4xl font-black text-liga-coral tabular-nums leading-none">{p.pts}</span>
                 </div>
                 <p className="text-sm font-extrabold mt-1 truncate text-[var(--color-text)]">#{p.numero} {p.nombre}</p>
                 <p className="text-[11px] text-[var(--color-text-dim)] mt-2">
@@ -369,20 +364,20 @@ export function PartidoView({
       {/* BOX SCORE */}
       {(boxLocal.length > 0 || boxVisita.length > 0) && (
         <section>
-          <h2 className="text-xs font-extrabold tracking-widest text-[var(--color-text)] uppercase mb-3 border-b-2 border-liga-coral pb-2">
+          <h2 className="text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase mb-3 border-b-2 border-liga-coral pb-2">
             📊 Box Score
           </h2>
           <div className="space-y-3">
             {[
-              { team: local, rows: boxLocal,  totals: totalsLocal, bgHeader: 'bg-blue-50',    textHeader: 'text-blue-700' },
-              { team: visit, rows: boxVisita, totals: totalsVisit, bgHeader: 'bg-red-50',     textHeader: 'text-red-700' },
+              { team: local, rows: boxLocal,  totals: totalsLocal, bgHeader: 'bg-blue-500/10',  textHeader: 'text-blue-300' },
+              { team: visit, rows: boxVisita, totals: totalsVisit, bgHeader: 'bg-red-500/10',   textHeader: 'text-red-300' },
             ].map(t => {
               const collapsed = !!collapsedTeams[t.team];
               return (
-                <div key={t.team} className="bg-white rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden">
+                <div key={t.team} className="bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden">
                   <button
                     onClick={() => setCollapsedTeams(prev => ({ ...prev, [t.team]: !prev[t.team] }))}
-                    className={`w-full flex items-center justify-between px-5 py-3 hover:bg-[var(--color-bg)] transition-colors ${t.bgHeader}`}
+                    className={`w-full flex items-center justify-between px-5 py-3 hover:bg-[var(--color-card-2)] transition-colors ${t.bgHeader}`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className={`inline-block text-[10px] font-bold transition-transform ${t.textHeader} ` + (collapsed ? '-rotate-90' : 'rotate-0')}>▼</span>
@@ -390,7 +385,7 @@ export function PartidoView({
                     </div>
                     {t.rows.length > 0 && (
                       <div className="flex items-baseline gap-2 flex-shrink-0">
-                        <span className="text-xl font-extrabold text-liga-coral tabular-nums">{t.totals.pts}</span>
+                        <span className="cond text-2xl font-black text-liga-coral tabular-nums">{t.totals.pts}</span>
                         <span className="text-[10px] font-bold text-[var(--color-text-dim)] uppercase">PTS</span>
                         <span className="text-xs text-[var(--color-text-dim)] ml-2 hidden sm:inline">
                           {t.totals.reb}R · {t.totals.rob}S · {t.totals.blo}B
@@ -402,7 +397,7 @@ export function PartidoView({
                   {!collapsed && (
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs">
-                        <thead className="bg-[var(--color-bg)] text-[var(--color-text-dim)] font-bold">
+                        <thead className="bg-[var(--color-bg-alt)] text-[var(--color-text-dim)] font-bold">
                           <tr>
                             <th className="text-left py-2 px-3">Jugador</th>
                             <th className="py-2 px-2 text-liga-coral">PTS</th>
@@ -418,7 +413,7 @@ export function PartidoView({
                           {t.rows.length === 0 ? (
                             <tr><td colSpan={8} className="text-center py-4 text-[var(--color-text-dim2)] text-xs">Sin jugadas aún</td></tr>
                           ) : t.rows.map(r => (
-                            <tr key={r.jugadorId} className="border-t border-[var(--color-border)] hover:bg-[var(--color-bg)]">
+                            <tr key={r.jugadorId} className="border-t border-[var(--color-border)] hover:bg-[var(--color-card-2)]">
                               <td className="py-2 px-3 font-bold truncate max-w-[160px] text-[var(--color-text)]">
                                 <span className="text-liga-coral mr-1">#{r.numero}</span>
                                 {r.nombre}
@@ -443,14 +438,14 @@ export function PartidoView({
         </section>
       )}
 
-      {/* PLAY BY PLAY (al final) */}
+      {/* PLAY BY PLAY */}
       {jugadas.length > 0 && (
-        <section className="bg-white rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden">
+        <section className="bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden">
           <button
             onClick={() => setPbpOpen(v => !v)}
-            className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-[var(--color-bg)] transition-colors"
+            className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-[var(--color-card-2)] transition-colors"
           >
-            <span className="text-xs font-extrabold tracking-widest text-[var(--color-text)] uppercase flex items-center gap-2">
+            <span className="text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase flex items-center gap-2">
               <span className={'inline-block transition-transform text-[10px] ' + (pbpOpen ? 'rotate-0' : '-rotate-90')}>▼</span>
               📋 Play by Play
             </span>
@@ -468,17 +463,17 @@ export function PartidoView({
                     'flex items-center gap-3 px-4 py-2.5 border-t border-[var(--color-border)] first:border-t-0 ' +
                     (idx === 0 && isLive ? 'bg-liga-coralSoft' : '')
                   }>
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${acc?.bg ?? 'bg-zinc-100'}`}>
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${acc?.bg ?? 'bg-zinc-500/15'}`}>
                       <span className="text-base">{acc?.icon ?? '🏀'}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       {esSub ? (
                         <>
-                          <p className="text-[10px] font-extrabold text-purple-700 uppercase">Cambio</p>
+                          <p className="text-[10px] font-extrabold text-purple-300 uppercase">Cambio</p>
                           <p className="text-[11px] leading-tight">
-                            <span className="text-red-600">↓ #{j.jugadorSaleNumero} {j.jugadorSaleNombre}</span>
+                            <span className="text-red-400">↓ #{j.jugadorSaleNumero} {j.jugadorSaleNombre}</span>
                             <br />
-                            <span className="text-emerald-600">↑ #{j.jugadorNumero} {j.jugadorNombre}</span>
+                            <span className="text-emerald-400">↑ #{j.jugadorNumero} {j.jugadorNombre}</span>
                           </p>
                         </>
                       ) : (
@@ -486,7 +481,7 @@ export function PartidoView({
                           <p className="text-xs font-extrabold truncate text-[var(--color-text)]">#{j.jugadorNumero} {j.jugadorNombre}</p>
                           <p className="text-[10px] text-[var(--color-text-dim)]">
                             {acc?.label ?? j.accion}
-                            {j.puntos > 0 && <span className="text-emerald-600 font-extrabold ml-1">+{j.puntos}</span>}
+                            {j.puntos > 0 && <span className="text-emerald-400 font-extrabold ml-1">+{j.puntos}</span>}
                           </p>
                         </>
                       )}
@@ -494,7 +489,7 @@ export function PartidoView({
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
                       <span className={
                         'text-[9px] font-extrabold px-1.5 py-0.5 rounded ' +
-                        (j.equipo === 'local' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700')
+                        (j.equipo === 'local' ? 'bg-blue-500/20 text-blue-300' : 'bg-red-500/20 text-red-300')
                       }>
                         {(j.equipo === 'local' ? local : visit).slice(0, 8)}
                       </span>

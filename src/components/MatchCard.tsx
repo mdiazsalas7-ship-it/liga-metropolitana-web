@@ -33,21 +33,21 @@ export function MatchCard({
   return (
     <Link
       href={`/partido/${partido.id}?categoria=${cat}`}
-      className="block bg-white border border-[var(--color-border)] rounded-xl shadow-card card-hover overflow-hidden"
+      className="block bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl shadow-card card-hover overflow-hidden"
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--color-border)] bg-[var(--color-bg)]">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--color-border)] bg-[var(--color-bg-alt)]">
         {isRes ? (
-          <span className="text-[10px] font-extrabold tracking-widest text-liga-final uppercase">
+          <span className="text-[10px] font-extrabold tracking-[0.13em] text-liga-final uppercase">
             ● Final
           </span>
         ) : (
-          <span className="text-[10px] font-extrabold tracking-widest text-liga-coral uppercase">
+          <span className="text-[10px] font-extrabold tracking-[0.1em] text-liga-coral uppercase">
             {fechaRelativa(partido.fechaAsignada)}
             {partido.hora ? ` · ${partido.hora}` : ''}
           </span>
         )}
-        <span className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-wider font-bold">
+        <span className="text-[10px] text-[var(--color-text-dim2)] uppercase tracking-wider font-bold">
           {CAT_LABELS[cat] ?? cat}
           {isRes ? ` · ${fechaCorta(partido.fechaAsignada)}` : ''}
         </span>
@@ -68,8 +68,8 @@ export function MatchCard({
           </div>
           {isRes && (
             <span className={
-              'text-xl font-extrabold tabular-nums ' +
-              (localGana ? 'text-[var(--color-text)]' : 'text-[var(--color-text-dim)]')
+              'cond text-2xl font-extrabold tabular-nums ' +
+              (localGana ? 'text-[var(--color-text)]' : 'text-[var(--color-text-dim2)]')
             }>
               {ml}
             </span>
@@ -89,8 +89,8 @@ export function MatchCard({
           </div>
           {isRes && (
             <span className={
-              'text-xl font-extrabold tabular-nums ' +
-              (!localGana ? 'text-[var(--color-text)]' : 'text-[var(--color-text-dim)]')
+              'cond text-2xl font-extrabold tabular-nums ' +
+              (!localGana ? 'text-[var(--color-text)]' : 'text-[var(--color-text-dim2)]')
             }>
               {mv}
             </span>
@@ -100,7 +100,7 @@ export function MatchCard({
         {/* En próximos: vs */}
         {!isRes && (
           <div className="text-center pt-1">
-            <span className="text-[10px] text-[var(--color-text-dim2)] font-bold uppercase tracking-widest">vs</span>
+            <span className="text-[10px] text-[var(--color-text-dim2)] font-bold uppercase tracking-[0.13em]">vs</span>
           </div>
         )}
       </div>

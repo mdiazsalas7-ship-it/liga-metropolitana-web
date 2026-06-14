@@ -12,7 +12,6 @@ import { MatchCard } from '@/components/MatchCard';
 import { RosterClient } from '@/components/RosterClient';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 60;
 
 export async function generateMetadata({
   params, searchParams,
@@ -76,9 +75,9 @@ export default async function EquipoPage({
       </p>
 
       {/* Header con logo, nombre, récord */}
-      <section className="rounded-2xl border border-[var(--color-border)] bg-white shadow-card p-5 sm:p-6">
+      <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card p-5 sm:p-6">
         <div className="flex items-center gap-4">
-          <TeamLogo nombre={eq.nombre} logoUrl={eq.logoUrl} size={80} />
+          <TeamLogo nombre={eq.nombre} logoUrl={eq.logoUrl} size={80} ring />
           <div className="min-w-0 flex-1">
             <h1 className="text-xl sm:text-3xl font-extrabold truncate">{eq.nombre}</h1>
             <p className="text-xs text-[var(--color-text-dim)] mt-1">
@@ -88,17 +87,17 @@ export default async function EquipoPage({
         </div>
 
         <div className="grid grid-cols-3 gap-3 mt-5">
-          <div className="rounded-lg bg-white p-3">
+          <div className="rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-border)] p-3">
             <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Ganados</p>
-            <p className="text-2xl font-extrabold text-emerald-500 mt-1 tabular-nums">{ganados}</p>
+            <p className="cond text-3xl font-extrabold text-liga-final mt-1 tabular-nums leading-none">{ganados}</p>
           </div>
-          <div className="rounded-lg bg-white p-3">
+          <div className="rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-border)] p-3">
             <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Perdidos</p>
-            <p className="text-2xl font-extrabold text-red-400 mt-1 tabular-nums">{perdidos}</p>
+            <p className="cond text-3xl font-extrabold text-liga-live mt-1 tabular-nums leading-none">{perdidos}</p>
           </div>
-          <div className="rounded-lg bg-white p-3">
+          <div className="rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-border)] p-3">
             <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Plantel</p>
-            <p className="text-2xl font-extrabold text-white mt-1 tabular-nums">{jugadores.length}</p>
+            <p className="cond text-3xl font-extrabold text-[var(--color-text)] mt-1 tabular-nums leading-none">{jugadores.length}</p>
           </div>
         </div>
       </section>

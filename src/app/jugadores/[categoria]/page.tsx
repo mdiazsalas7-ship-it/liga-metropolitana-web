@@ -1,4 +1,4 @@
-// Líderes por estadística (puntos, rebotes, robos, triples, bloqueos) de una categoría.
+// Líderes por estadística de una categoría.
 
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -9,15 +9,14 @@ import { TeamLogo } from '@/components/TeamLogo';
 import type { Jugador } from '@/types';
 
 export const revalidate = 300;
-export const dynamic = 'force-dynamic';
 
 type StatKey = 'puntos' | 'rebotes' | 'robos' | 'triples' | 'bloqueos';
 const STAT_LABELS: Record<StatKey, { label: string; unit: string; color: string }> = {
   puntos:   { label: 'Goleadores', unit: 'PPP',          color: 'text-liga-gold' },
-  rebotes:  { label: 'Rebotes',    unit: 'RPP',          color: 'text-emerald-400' },
-  robos:    { label: 'Robos',      unit: 'por partido',  color: 'text-blue-400' },
-  triples:  { label: 'Triples',    unit: 'por partido',  color: 'text-purple-400' },
-  bloqueos: { label: 'Bloqueos',   unit: 'por partido',  color: 'text-red-400' },
+  rebotes:  { label: 'Rebotes',    unit: 'RPP',          color: 'text-liga-final' },
+  robos:    { label: 'Robos',      unit: 'por partido',  color: 'text-blue-300' },
+  triples:  { label: 'Triples',    unit: 'por partido',  color: 'text-purple-300' },
+  bloqueos: { label: 'Bloqueos',   unit: 'por partido',  color: 'text-liga-live' },
 };
 
 function rankBy(jugadores: Jugador[], stat: StatKey, n = 10) {
@@ -77,8 +76,8 @@ export default async function JugadoresPorCategoriaPage({ params }: { params: { 
             className={
               'whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ' +
               (x.id === c.id
-                ? 'bg-liga-dark border border-liga-dark text-white'
-                : 'bg-white border border-[var(--color-border)] text-[var(--color-text-dim)] hover:bg-[var(--color-bg)]')
+                ? 'bg-liga-coral border border-liga-coral text-white'
+                : 'bg-[var(--color-card)] border border-[var(--color-border)] text-[var(--color-text-dim)] hover:bg-[var(--color-card-2)]')
             }>
             {x.label}
           </Link>
@@ -94,11 +93,11 @@ export default async function JugadoresPorCategoriaPage({ params }: { params: { 
             <h2 className="text-xs font-bold tracking-widest text-[var(--color-text-dim)] uppercase mb-3">
               {cfg.label}
             </h2>
-            <div className="rounded-xl border border-[var(--color-border)] bg-white shadow-card divide-y divide-[var(--color-border)]">
+            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card divide-y divide-[var(--color-border)]">
               {rank.map((r, i) => (
                 <Link key={r.jugador.id} href={`/jugador/${r.jugador.id}?categoria=${c.id}`}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-bg)] transition-colors">
-                  <span className="text-xs font-bold text-[var(--color-text-dim2)] w-5 tabular-nums">{i + 1}.</span>
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-card-2)] transition-colors">
+                  <span className="cond text-base font-extrabold text-[var(--color-text-dim2)] w-6 tabular-nums">{i + 1}</span>
                   <TeamLogo nombre={r.jugador.nombre} logoUrl={r.jugador.fotoUrl} size={36} />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold truncate">
@@ -108,7 +107,7 @@ export default async function JugadoresPorCategoriaPage({ params }: { params: { 
                     <p className="text-[11px] text-[var(--color-text-dim)] truncate">{r.jugador.equipoNombre}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <span className={'text-lg font-extrabold tabular-nums ' + cfg.color}>
+                    <span className={'cond text-2xl font-black tabular-nums ' + cfg.color}>
                       {r.promedio.toFixed(1)}
                     </span>
                     <p className="text-[9px] text-[var(--color-text-dim2)] uppercase font-bold">{cfg.unit}</p>
@@ -121,7 +120,7 @@ export default async function JugadoresPorCategoriaPage({ params }: { params: { 
       })}
 
       {jugadores.length === 0 && (
-        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-white shadow-card">
+        <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card">
           <p className="text-sm text-[var(--color-text-dim)]">Sin jugadores registrados aún.</p>
         </div>
       )}

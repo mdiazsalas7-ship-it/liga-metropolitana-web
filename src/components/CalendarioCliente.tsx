@@ -126,10 +126,10 @@ export function CalendarioCliente({
                 (active
                   ? (isLive
                       ? 'bg-liga-live text-white border-liga-live'
-                      : 'bg-liga-dark text-white border-liga-dark')
+                      : 'bg-liga-coral text-white border-liga-coral')
                   : (isLive && liveCount > 0
                       ? 'bg-liga-liveSoft text-liga-live border-liga-live/30'
-                      : 'bg-white text-[var(--color-text-dim)] border-[var(--color-border)] hover:bg-[var(--color-bg)]'))
+                      : 'bg-[var(--color-card)] text-[var(--color-text-dim)] border-[var(--color-border)] hover:bg-[var(--color-card-2)]'))
               }
             >
               {f.label}
@@ -148,19 +148,20 @@ export function CalendarioCliente({
 
       {/* Buscador */}
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-dim2)] text-sm">🔍</span>
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-dim2)] text-sm" aria-hidden="true">🔍</span>
         <input
           type="text"
+          aria-label={`Buscar equipo en ${categoriaLabel}`}
           placeholder={`Buscar equipo en ${categoriaLabel}...`}
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full bg-white border border-[var(--color-border)] rounded-lg pl-9 pr-9 py-2.5 text-sm outline-none focus:border-liga-coral focus:ring-2 focus:ring-liga-coral/20 transition-colors"
+          className="w-full bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg pl-9 pr-9 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-liga-coral focus:ring-2 focus:ring-liga-coral/20 transition-colors placeholder:text-[var(--color-text-dim2)]"
         />
         {search && (
           <button
             onClick={() => setSearch('')}
-            aria-label="Limpiar"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-bg)] hover:bg-[var(--color-border)] text-[var(--color-text-dim)] text-xs font-bold flex items-center justify-center"
+            aria-label="Limpiar búsqueda"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-bg-alt)] hover:bg-[var(--color-card-2)] text-[var(--color-text-dim)] text-xs font-bold flex items-center justify-center"
           >
             ×
           </button>
@@ -169,7 +170,7 @@ export function CalendarioCliente({
 
       {/* Vacío */}
       {ordered.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-xl border border-[var(--color-border)] shadow-card">
+        <div className="text-center py-12 bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] shadow-card">
           <p className="text-sm text-[var(--color-text-dim)]">
             No hay partidos {search ? `para "${search}"` : 'con esos filtros'}.
           </p>
@@ -179,7 +180,7 @@ export function CalendarioCliente({
       {/* Grupos */}
       {(Array.from(grupos.entries()) as [string, Partido[]][]).map(([fecha, lista]) => (
         <section key={fecha}>
-          <h3 className="text-[11px] uppercase tracking-widest text-[var(--color-text-dim)] font-extrabold mb-3 pl-1">
+          <h3 className="text-[11px] uppercase tracking-[0.13em] text-[var(--color-text-dim)] font-extrabold mb-3 pl-1">
             {fechaHeader(fecha)}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

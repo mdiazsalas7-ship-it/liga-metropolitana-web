@@ -27,7 +27,7 @@ export function RosterClient({
           <button
             key={j.id}
             onClick={() => setSelected(j)}
-            className="rounded-lg border border-[var(--color-border)] bg-white shadow-card hover:bg-[var(--color-bg)] hover:border-liga-coral/40 transition-colors px-3.5 py-2.5 flex items-center gap-3 text-left w-full"
+            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] shadow-card hover:bg-[var(--color-card-2)] hover:border-liga-coral/40 transition-colors px-3.5 py-2.5 flex items-center gap-3 text-left w-full"
           >
             <TeamLogo nombre={j.nombre} logoUrl={j.fotoUrl} size={36} />
             <div className="min-w-0 flex-1">

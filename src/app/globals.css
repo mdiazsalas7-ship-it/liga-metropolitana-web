@@ -3,73 +3,94 @@
 @tailwind utilities;
 
 :root {
-  /* Fondos */
-  --color-bg:        #f4f4f5;   /* gris muy claro de página */
-  --color-bg-alt:    #ffffff;   /* superficies y cards */
-  --color-card:      #ffffff;
-  --color-dark:      #18181b;   /* header tipo ESPN */
-  --color-dark-soft: #27272a;
+  /* ===== FONDOS (dark deportivo) ===== */
+  --color-bg:        #0a0e1a;   /* casi-negro azulado de página */
+  --color-bg-alt:    #0d121f;   /* franjas / barras superiores */
+  --color-card:      #141a28;   /* superficie de cards */
+  --color-card-2:    #1b2333;   /* superficie elevada / hover */
+  --color-dark:      #0d121f;   /* header */
+  --color-dark-soft: #1b2333;
 
-  /* Bordes */
-  --color-border:        rgba(0,0,0,0.08);
-  --color-border-strong: rgba(0,0,0,0.14);
+  /* ===== BORDES ===== */
+  --color-border:        rgba(255,255,255,0.07);
+  --color-border-strong: rgba(255,255,255,0.13);
 
-  /* Texto */
-  --color-text:      #0f172a;   /* casi negro */
-  --color-text-dim:  #475569;   /* secundario */
-  --color-text-dim2: #94a3b8;   /* terciario */
+  /* ===== TEXTO ===== */
+  --color-text:      #EDEFF4;   /* hueso */
+  --color-text-dim:  #9aa6bd;   /* secundario */
+  --color-text-dim2: #5d6880;   /* terciario */
 
-  /* Acentos de marca */
-  --color-accent:      #D85A30;   /* coral tipo ESPN */
-  --color-accent-soft: #FAECE7;
-  --color-accent-dark: #993C1D;
+  /* ===== ACENTOS DE MARCA ===== */
+  --color-accent:      #FF5A30;   /* coral neón */
+  --color-accent-soft: rgba(255,90,48,0.13);
+  --color-accent-dark: #c7401f;
 
-  --color-navy:        #0d1f4a;   /* navy de la liga (para algún detalle) */
+  --color-navy:        #0d1f4a;   /* navy de la liga (profundidad) */
 
-  /* Estados */
-  --color-live:      #dc2626;
-  --color-live-soft: #fef2f2;
-  --color-final:     #059669;
-  --color-final-soft:#ecfdf5;
-  --color-gold:      #d97706;
-  --color-gold-soft: #fef3c7;
+  /* ===== ESTADOS ===== */
+  --color-live:      #FF3B3B;
+  --color-live-soft: rgba(255,59,59,0.12);
+  --color-final:     #7CFF6B;   /* lima */
+  --color-final-soft:rgba(124,255,107,0.12);
+  --color-gold:      #FFC542;
+  --color-gold-soft: rgba(255,197,66,0.14);
 }
 
 html, body {
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-body, 'Archivo'), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Glow ambiental detrás del contenido */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 500px at 85% -5%, rgba(255,90,48,0.10), transparent 60%),
+    radial-gradient(750px 520px at 8% 0%, rgba(13,31,74,0.55), transparent 55%);
+}
+body > * { position: relative; z-index: 1; }
+
 a { color: inherit; text-decoration: none; }
 * { box-sizing: border-box; }
+
+/* Números y marcadores: tipografía condensada atlética */
+.cond { font-family: var(--font-cond, 'Barlow Condensed'), 'Archivo', sans-serif; }
 
 /* Util: ocultar scrollbar pero permitir scroll */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Pulsing dot rojo */
+/* Pulsing dot */
 @keyframes pulse-live {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.55; transform: scale(0.92); }
+  50%      { opacity: 0.5; transform: scale(0.8); }
 }
 .pulse-live { animation: pulse-live 1.4s ease-in-out infinite; }
 
-/* Card hover suave (las cards tienen sombra; al hover se levantan un poquito) */
+/* Card hover */
 .card-hover {
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
   border-color: var(--color-border-strong);
+  background-color: var(--color-card-2);
 }
 
-/* Sombras consistentes */
-.shadow-card { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03); }
-.shadow-hero { box-shadow: 0 10px 30px rgba(216, 90, 48, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06); }
+/* Sombras */
+.shadow-card { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35); }
+.shadow-hero {
+  box-shadow:
+    0 30px 60px -20px rgba(255, 90, 48, 0.28),
+    0 0 0 1px rgba(255, 90, 48, 0.10) inset;
+}
 
 /* Modal fade in */
 @keyframes fade-in {
@@ -77,3 +98,10 @@ a { color: inherit; text-decoration: none; }
   to   { opacity: 1; }
 }
 .animate-fade-in { animation: fade-in 0.18s ease-out; }
+
+/* Respetar reduce-motion */
+@media (prefers-reduced-motion: reduce) {
+  .pulse-live, .animate-fade-in { animation: none; }
+  .card-hover { transition: none; }
+  * { scroll-behavior: auto !important; }
+}

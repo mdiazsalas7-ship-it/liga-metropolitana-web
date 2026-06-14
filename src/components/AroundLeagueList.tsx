@@ -1,5 +1,4 @@
-// "ALREDEDOR DE LA LIGA": lista vertical de noticias con thumbnail grande
-// + título + extracto + fecha. Estilo "Around the NBA".
+// "ALREDEDOR DE LA LIGA": lista vertical de noticias con thumbnail grande.
 
 import Link from 'next/link';
 import { fechaRelativa } from '@/lib/fechas';
@@ -10,8 +9,8 @@ export function AroundLeagueList({ noticias }: { noticias: Noticia[] }) {
   if (noticias.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden">
-      <h2 className="px-5 py-4 border-b border-[var(--color-border)] text-xs font-extrabold tracking-widest text-[var(--color-text)] uppercase">
+    <div className="bg-[var(--color-card)] rounded-xl border border-[var(--color-border)] shadow-card overflow-hidden">
+      <h2 className="px-5 py-4 border-b border-[var(--color-border)] text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase">
         Alrededor de la liga
       </h2>
       <ul className="divide-y divide-[var(--color-border)]">
@@ -22,7 +21,7 @@ export function AroundLeagueList({ noticias }: { noticias: Noticia[] }) {
             <li key={n.id}>
               <Link
                 href="/noticias"
-                className="flex gap-4 px-5 py-4 hover:bg-zinc-50 transition-colors"
+                className="flex gap-4 px-5 py-4 hover:bg-[var(--color-card-2)] transition-colors"
               >
                 {img ? (
                   <img

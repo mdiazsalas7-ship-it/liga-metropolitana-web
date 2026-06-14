@@ -8,7 +8,6 @@ import { getJugadorById, getEquipoById } from '@/lib/queries';
 import { TeamLogo } from '@/components/TeamLogo';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 300;
 
 export async function generateMetadata({
   params, searchParams,
@@ -45,9 +44,9 @@ export default async function JugadorPage({
   const pj = j.partidosJugados || 0;
   const stats = [
     { key: 'puntos',      label: 'Puntos',      value: j.puntos      ?? 0, color: 'text-liga-gold' },
-    { key: 'rebotes',     label: 'Rebotes',     value: j.rebotes     ?? 0, color: 'text-emerald-400' },
+    { key: 'rebotes',     label: 'Rebotes',     value: j.rebotes     ?? 0, color: 'text-liga-final' },
     { key: 'robos',       label: 'Robos',       value: j.robos       ?? 0, color: 'text-blue-400' },
-    { key: 'bloqueos',    label: 'Bloqueos',    value: j.bloqueos    ?? 0, color: 'text-red-400' },
+    { key: 'bloqueos',    label: 'Bloqueos',    value: j.bloqueos    ?? 0, color: 'text-liga-live' },
     { key: 'triples',     label: 'Triples',     value: j.triples     ?? 0, color: 'text-purple-400' },
     { key: 'dobles',      label: 'Dobles',      value: j.dobles      ?? 0, color: 'text-blue-300' },
     { key: 'tirosLibres', label: 'Tiros libres', value: j.tirosLibres ?? 0, color: 'text-[var(--color-text-dim)]' },
@@ -65,10 +64,10 @@ export default async function JugadorPage({
       </p>
 
       {/* Header */}
-      <section className="rounded-2xl border border-[var(--color-border)] bg-white shadow-card p-5 sm:p-6">
+      <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card p-5 sm:p-6">
         <div className="flex items-start gap-4">
           <div className="relative flex-shrink-0">
-            <TeamLogo nombre={j.nombre} logoUrl={j.fotoUrl} size={88} />
+            <TeamLogo nombre={j.nombre} logoUrl={j.fotoUrl} size={88} ring />
             {j.numero != null && (
               <div className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-liga-coral border-4 border-[var(--color-bg)] flex items-center justify-center text-xs font-extrabold text-white">
                 {j.numero}
@@ -96,13 +95,13 @@ export default async function JugadorPage({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
             {[
               { label: 'PPP', val: (j.puntos ?? 0) / pj, color: 'text-liga-gold' },
-              { label: 'RPP', val: (j.rebotes ?? 0) / pj, color: 'text-emerald-400' },
+              { label: 'RPP', val: (j.rebotes ?? 0) / pj, color: 'text-liga-final' },
               { label: '3PP', val: (j.triples ?? 0) / pj, color: 'text-purple-400' },
-              { label: 'PJ',  val: pj,                   color: 'text-white', isInt: true },
+              { label: 'PJ',  val: pj,                   color: 'text-[var(--color-text)]', isInt: true },
             ].map(s => (
-              <div key={s.label} className="rounded-lg bg-white p-3">
+              <div key={s.label} className="rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-border)] p-3">
                 <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">{s.label}</p>
-                <p className={`text-2xl font-extrabold mt-1 tabular-nums ${s.color}`}>
+                <p className={`cond text-3xl font-extrabold mt-1 tabular-nums leading-none ${s.color}`}>
                   {(s as any).isInt ? s.val : s.val.toFixed(1)}
                 </p>
               </div>
@@ -121,9 +120,9 @@ export default async function JugadorPage({
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {stats.map(s => (
-            <div key={s.key} className="rounded-lg border border-[var(--color-border)] bg-white shadow-card p-3">
+            <div key={s.key} className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] shadow-card p-3">
               <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">{s.label}</p>
-              <p className={`text-xl font-extrabold mt-1 tabular-nums ${s.color}`}>{s.value}</p>
+              <p className={`cond text-2xl font-extrabold mt-1 tabular-nums ${s.color}`}>{s.value}</p>
             </div>
           ))}
         </div>
