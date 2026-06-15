@@ -4,7 +4,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { CATEGORIAS, type CategoriaId } from '@/lib/categorias';
-import { getJugadorById, getEquipoById } from '@/lib/queries';
+import { getJugadorById, getEquipoById, getStatsDeJugador, getPartidoById, getEquipos } from '@/lib/queries';
+import { fechaCorta } from '@/lib/fechas';
 import { TeamLogo } from '@/components/TeamLogo';
 
 export const dynamic = 'force-dynamic';
@@ -40,6 +41,62 @@ export default async function JugadorPage({
   const j = jug!;
 
   const eq = j.equipoId ? await getEquipoById(c.id as CategoriaId, j.equipoId) : null;
+
+  // ===== GAME LOG: rendimiento partido por partido =====
+  const statsPorPartido = await getStatsDeJugador(j.id);
+  const equiposMap = await getEquipos(c.id as CategoriaId);
+
+  const idsUnicos = Array.from(
+    new Set(statsPorPartido.map(s => s.partidoId).filter(Boolean))
+  ) as string[];
+  const partidosArr = await Promise.all(
+    idsUnicos.map(id => getPartidoById(c.id as CategoriaId, id))
+  );
+  const partidosMap = new Map<string, any>();
+  partidosArr.forEach((p, i) => { if (p) partidosMap.set(idsUnicos[i], p); });
+
+  const ptsDe = (s: any) => (s.tirosLibres || 0) + (s.dobles || 0) * 2 + (s.triples || 0) * 3;
+  const teamId = j.equipoId;
+  const teamName = (j.equipoNombre || '').trim().toUpperCase();
+
+  const gameLog = (statsPorPartido
+    .map(s => {
+      const p = partidosMap.get(s.partidoId);
+      if (!p) return null;
+      const esLocal =
+        (!!teamId && p.equipoLocalId === teamId) ||
+        (!!teamName && (p.equipoLocalNombre || '').trim().toUpperCase() === teamName);
+      const rivalNombre = esLocal ? p.equipoVisitanteNombre : p.equipoLocalNombre;
+      const rivalId     = esLocal ? p.equipoVisitanteId : p.equipoLocalId;
+      const mio  = esLocal ? (p.marcadorLocal ?? 0)     : (p.marcadorVisitante ?? 0);
+      const otro = esLocal ? (p.marcadorVisitante ?? 0) : (p.marcadorLocal ?? 0);
+      const fin  = p.estatus === 'finalizado';
+      return {
+        partidoId: s.partidoId,
+        fecha: typeof p.fechaAsignada === 'string' ? p.fechaAsignada : '',
+        rivalNombre: rivalNombre || 'Rival',
+        rivalLogo: equiposMap.get(rivalId || '')?.logoUrl,
+        esLocal, mio, otro, fin,
+        gano: fin ? mio > otro : null,
+        pts: ptsDe(s),
+        reb: s.rebotes  || 0,
+        rob: s.robos    || 0,
+        blo: s.bloqueos || 0,
+        triples: s.triples || 0,
+      };
+    })
+    .filter(Boolean) as any[])
+    .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+
+  // Mejor partido (más puntos) y promedio últimos 5
+  const mejor = gameLog.reduce((best: any, g: any) => (!best || g.pts > best.pts ? g : best), null);
+  const ult5 = gameLog.slice(0, 5);
+  const prom5 = ult5.length
+    ? {
+        pts: ult5.reduce((a: number, g: any) => a + g.pts, 0) / ult5.length,
+        reb: ult5.reduce((a: number, g: any) => a + g.reb, 0) / ult5.length,
+      }
+    : null;
 
   const pj = j.partidosJugados || 0;
   const stats = [
@@ -112,6 +169,88 @@ export default async function JugadorPage({
           <p className="mt-4 text-xs text-[var(--color-text-dim2)]">Aún no jugó partidos de la temporada.</p>
         )}
       </section>
+
+      {/* GAME LOG */}
+      {gameLog.length > 0 && (
+        <section>
+          <h2 className="text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase mb-3 border-b-2 border-liga-coral pb-2">
+            Rendimiento partido por partido
+          </h2>
+
+          {/* Highlights */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {mejor && (
+              <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-card p-4">
+                <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Mejor partido</p>
+                <p className="cond text-4xl font-black text-liga-gold mt-1 tabular-nums leading-none">{mejor.pts}</p>
+                <p className="text-[11px] text-[var(--color-text-dim)] mt-1.5 truncate">
+                  pts vs {mejor.rivalNombre}
+                </p>
+              </div>
+            )}
+            {prom5 && (
+              <div className="rounded-xl bg-[var(--color-card)] border border-[var(--color-border)] shadow-card p-4">
+                <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Últimos {ult5.length}</p>
+                <p className="cond text-4xl font-black text-liga-coral mt-1 tabular-nums leading-none">{prom5.pts.toFixed(1)}</p>
+                <p className="text-[11px] text-[var(--color-text-dim)] mt-1.5">
+                  pts · {prom5.reb.toFixed(1)} reb de promedio
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Tabla */}
+          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="bg-[var(--color-bg-alt)] text-[var(--color-text-dim)] font-bold">
+                <tr>
+                  <th className="text-left py-2.5 px-3">Fecha</th>
+                  <th className="text-left py-2.5">Rival</th>
+                  <th className="py-2.5 px-2 text-center">Res.</th>
+                  <th className="py-2.5 px-2 text-center text-liga-coral">PTS</th>
+                  <th className="py-2.5 px-2 text-center">REB</th>
+                  <th className="py-2.5 px-2 text-center">ROB</th>
+                  <th className="py-2.5 px-2 text-center">BLO</th>
+                  <th className="py-2.5 px-2 text-center">3P</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gameLog.map((g: any) => (
+                  <tr key={g.partidoId} className="border-t border-[var(--color-border)] hover:bg-[var(--color-card-2)] transition-colors">
+                    <td className="py-2.5 px-3 text-[var(--color-text-dim)] whitespace-nowrap">
+                      {g.fecha ? fechaCorta(g.fecha) : '—'}
+                    </td>
+                    <td className="py-2.5">
+                      <Link
+                        href={`/partido/${g.partidoId}?categoria=${c.id}`}
+                        className="flex items-center gap-2 min-w-0 hover:text-liga-coral transition-colors"
+                      >
+                        <span className="text-[var(--color-text-dim2)] text-[10px] w-5 flex-shrink-0">{g.esLocal ? 'vs' : '@'}</span>
+                        <TeamLogo nombre={g.rivalNombre} logoUrl={g.rivalLogo} size={22} />
+                        <span className="font-semibold truncate max-w-[120px]">{g.rivalNombre}</span>
+                      </Link>
+                    </td>
+                    <td className="py-2.5 px-2 text-center whitespace-nowrap">
+                      {g.fin ? (
+                        <span className={'font-extrabold ' + (g.gano ? 'text-liga-final' : 'text-liga-live')}>
+                          {g.gano ? 'G' : 'P'} {g.mio}-{g.otro}
+                        </span>
+                      ) : (
+                        <span className="text-[var(--color-text-dim2)]">—</span>
+                      )}
+                    </td>
+                    <td className="py-2.5 px-2 text-center font-extrabold text-liga-coral tabular-nums">{g.pts}</td>
+                    <td className="py-2.5 px-2 text-center tabular-nums text-[var(--color-text-dim)]">{g.reb}</td>
+                    <td className="py-2.5 px-2 text-center tabular-nums text-[var(--color-text-dim)]">{g.rob}</td>
+                    <td className="py-2.5 px-2 text-center tabular-nums text-[var(--color-text-dim)]">{g.blo}</td>
+                    <td className="py-2.5 px-2 text-center tabular-nums text-[var(--color-text-dim)]">{g.triples}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       {/* Totales acumulados */}
       <section>
