@@ -4,6 +4,7 @@
 
 import { getDb } from './firebase';
 import { CATEGORIAS, colName, type CategoriaId } from './categorias';
+import { fechaMs } from './fechas';
 import type { Partido, Equipo, Jugador, Noticia } from '@/types';
 import {
   collection, getDocs, query, orderBy, limit, where,
@@ -137,18 +138,14 @@ export async function getEquipos(cat: CategoriaId): Promise<Map<string, Equipo>>
 export async function getNoticias(n = 3): Promise<Noticia[]> {
   const db = getDb();
   try {
-    const snap = await getDocs(query(
-      collection(db, 'noticias'),
-      orderBy('fecha', 'desc'),
-      limit(n)
-    ));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Noticia));
+    // No usamos orderBy('fecha'): el campo puede ser string en español o Timestamp,
+    // así que traemos y ordenamos en JS por la fecha real (cronológico, no alfabético).
+    const snap = await getDocs(query(collection(db, 'noticias'), limit(100)));
+    const todas = snap.docs.map(d => ({ id: d.id, ...d.data() } as Noticia));
+    todas.sort((a, b) => fechaMs(b.fecha) - fechaMs(a.fecha));
+    return todas.slice(0, n);
   } catch {
-    // Fallback: leer sin orderBy (por si el campo fecha no es ordenable)
-    try {
-      const snap = await getDocs(query(collection(db, 'noticias'), limit(50)));
-      return snap.docs.map(d => ({ id: d.id, ...d.data() } as Noticia)).slice(0, n);
-    } catch { return []; }
+    return [];
   }
 }
 
@@ -346,12 +343,10 @@ export async function getJugadoresPorCategoria(cat: CategoriaId): Promise<Jugado
 export async function getTodasNoticias(): Promise<Noticia[]> {
   const db = getDb();
   try {
-    const snap = await getDocs(query(
-      collection(db, 'noticias'),
-      orderBy('fecha', 'desc'),
-      limit(50)
-    ));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Noticia));
+    const snap = await getDocs(query(collection(db, 'noticias'), limit(100)));
+    const todas = snap.docs.map(d => ({ id: d.id, ...d.data() } as Noticia));
+    todas.sort((a, b) => fechaMs(b.fecha) - fechaMs(a.fecha));
+    return todas.slice(0, 50);
   } catch { return []; }
 }
 
