@@ -7,6 +7,7 @@ import type { Metadata } from 'next';
 import { CATEGORIAS, type CategoriaId } from '@/lib/categorias';
 import { getEquipos, getPartidosPorCategoria } from '@/lib/queries';
 import { TeamLogo } from '@/components/TeamLogo';
+import { PlayoffBracket } from '@/components/PlayoffBracket';
 
 export const revalidate = 300;
 
@@ -178,6 +179,9 @@ export default async function PosicionesPorCategoriaPage({ params }: { params: {
           </section>
         ))
       )}
+
+      {/* Bracket de playoffs (solo aparece si hay partidos de fase final) */}
+      <PlayoffBracket partidos={partidos} equipos={equiposMap} categoria={c.id} />
     </div>
   );
 }
