@@ -53,16 +53,54 @@ export default async function EquipoPage({
     p => p.equipoLocalId === eq.id || p.equipoVisitanteId === eq.id
   );
 
-  // Calcular récord (G-P) en regular
+  // Resultados finalizados, ordenados cronológicamente
+  type ResRow = { fecha: string; esLocal: boolean; mio: number; otro: number; gano: boolean; empate: boolean };
+  const resultados: ResRow[] = partidosEquipo
+    .filter(p => p.estatus === 'finalizado')
+    .map(p => {
+      const esLocal = p.equipoLocalId === eq.id;
+      const mio  = esLocal ? (p.marcadorLocal ?? 0)     : (p.marcadorVisitante ?? 0);
+      const otro = esLocal ? (p.marcadorVisitante ?? 0) : (p.marcadorLocal ?? 0);
+      return {
+        fecha: typeof p.fechaAsignada === 'string' ? p.fechaAsignada : '',
+        esLocal, mio, otro,
+        gano: mio > otro,
+        empate: mio === otro,
+      };
+    })
+    .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
+
   let ganados = 0, perdidos = 0;
-  partidosEquipo.forEach(p => {
-    if (p.estatus !== 'finalizado') return;
-    const esLocal = p.equipoLocalId === eq.id;
-    const mio   = esLocal ? (p.marcadorLocal ?? 0)     : (p.marcadorVisitante ?? 0);
-    const otro  = esLocal ? (p.marcadorVisitante ?? 0) : (p.marcadorLocal ?? 0);
-    if (mio > otro) ganados++;
-    else if (mio < otro) perdidos++;
-  });
+  resultados.forEach(r => { if (r.empate) return; if (r.gano) ganados++; else perdidos++; });
+
+  // Racha actual (desde el último partido hacia atrás)
+  let racha = 0;
+  let rachaTipo: 'G' | 'P' | null = null;
+  for (let i = resultados.length - 1; i >= 0; i--) {
+    const r = resultados[i];
+    if (r.empate) break;
+    const tipo: 'G' | 'P' = r.gano ? 'G' : 'P';
+    if (rachaTipo === null) { rachaTipo = tipo; racha = 1; }
+    else if (tipo === rachaTipo) { racha++; }
+    else break;
+  }
+
+  // Forma: últimos 5 (cronológico)
+  const ultimos5 = resultados.slice(-5);
+
+  // Splits local / visitante
+  const rec = (filtro: (r: ResRow) => boolean) => {
+    let g = 0, p = 0;
+    resultados.filter(filtro).forEach(r => { if (r.empate) return; if (r.gano) g++; else p++; });
+    return { g, p };
+  };
+  const recLocal  = rec(r => r.esLocal);
+  const recVisita = rec(r => !r.esLocal);
+
+  // Promedios de puntos
+  const njuegos = resultados.length;
+  const promPF = njuegos ? resultados.reduce((a, r) => a + r.mio, 0) / njuegos : 0;
+  const promPC = njuegos ? resultados.reduce((a, r) => a + r.otro, 0) / njuegos : 0;
 
   return (
     <div className="space-y-6">
@@ -101,6 +139,76 @@ export default async function EquipoPage({
           </div>
         </div>
       </section>
+
+      {/* Forma reciente */}
+      {resultados.length > 0 && (
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card p-5 sm:p-6">
+          <h2 className="text-xs font-bold tracking-widest text-[var(--color-text-dim)] uppercase mb-4">
+            Forma reciente
+          </h2>
+
+          <div className="flex flex-wrap items-start gap-x-10 gap-y-4">
+            {/* Racha */}
+            {rachaTipo && (
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Racha</p>
+                <p className={'cond text-3xl font-black mt-1 leading-none ' + (rachaTipo === 'G' ? 'text-liga-final' : 'text-liga-live')}>
+                  {racha}{rachaTipo}
+                </p>
+                <p className="text-[10px] text-[var(--color-text-dim)] mt-1">
+                  {rachaTipo === 'G' ? (racha === 1 ? 'victoria' : 'victorias seguidas') : (racha === 1 ? 'derrota' : 'derrotas seguidas')}
+                </p>
+              </div>
+            )}
+
+            {/* Últimos 5 */}
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold mb-2">
+                Últimos {ultimos5.length}
+              </p>
+              <div className="flex items-center gap-1.5">
+                {ultimos5.map((r, i) => (
+                  <span
+                    key={i}
+                    title={`${r.mio}-${r.otro} ${r.esLocal ? '(local)' : '(visitante)'}`}
+                    className={
+                      'w-7 h-7 rounded-md flex items-center justify-center text-xs font-extrabold ' +
+                      (r.empate
+                        ? 'bg-[var(--color-card-2)] text-[var(--color-text-dim)]'
+                        : r.gano
+                          ? 'bg-liga-finalSoft text-liga-final'
+                          : 'bg-liga-liveSoft text-liga-live')
+                    }
+                  >
+                    {r.empate ? 'E' : r.gano ? 'G' : 'P'}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[9px] text-[var(--color-text-dim2)] mt-1.5">del más viejo al más reciente</p>
+            </div>
+          </div>
+
+          {/* Splits */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+            <div className="rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-border)] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">De local</p>
+              <p className="cond text-2xl font-extrabold mt-1 tabular-nums leading-none text-[var(--color-text)]">{recLocal.g}-{recLocal.p}</p>
+            </div>
+            <div className="rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-border)] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">De visitante</p>
+              <p className="cond text-2xl font-extrabold mt-1 tabular-nums leading-none text-[var(--color-text)]">{recVisita.g}-{recVisita.p}</p>
+            </div>
+            <div className="rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-border)] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Prom. a favor</p>
+              <p className="cond text-2xl font-extrabold mt-1 tabular-nums leading-none text-liga-gold">{promPF.toFixed(1)}</p>
+            </div>
+            <div className="rounded-lg bg-[var(--color-bg-alt)] border border-[var(--color-border)] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--color-text-dim2)] font-bold">Prom. en contra</p>
+              <p className="cond text-2xl font-extrabold mt-1 tabular-nums leading-none text-[var(--color-text-dim)]">{promPC.toFixed(1)}</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Roster */}
       {jugadores.length > 0 && (
