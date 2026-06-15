@@ -80,7 +80,7 @@ export default async function NoticiaPage({ params }: { params: { id: string } }
         <img
           src={img}
           alt={n.titulo}
-          className="w-full rounded-2xl object-cover max-h-[480px] border border-[var(--color-border)]"
+          className="w-full h-auto rounded-2xl border border-[var(--color-border)]"
         />
       )}
 
