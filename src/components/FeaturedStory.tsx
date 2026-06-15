@@ -12,7 +12,7 @@ export function FeaturedStory({ noticia }: { noticia: Noticia }) {
 
   return (
     <Link
-      href="/noticias"
+      href={`/noticia/${noticia.id}`}
       className="block relative rounded-2xl overflow-hidden bg-[var(--color-card)] shadow-card card-hover min-h-[320px] sm:min-h-[440px] border border-[var(--color-border)]"
     >
       {hasImage && (

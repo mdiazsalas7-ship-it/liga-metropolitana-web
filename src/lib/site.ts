@@ -13,6 +13,7 @@ export const APP_URL = 'https://estadisticasavanzadas.vercel.app';
 // Logo principal de la liga — mismo que usa la app.
 export const LEAGUE_LOGO_URL = 'https://i.postimg.cc/hhF5fTPn/image.png';
 
-// Redes sociales (usadas en footer eventualmente)
-export const YOUTUBE_URL = 'https://www.youtube.com/@ligametropolitanadelejeeste';
-export const TIKTOK_URL  = 'https://www.tiktok.com/@barbakanzler';
+// Redes sociales
+export const INSTAGRAM_URL = 'https://www.instagram.com/liga_metropolitana_eje_este';
+export const TIKTOK_URL    = 'https://www.tiktok.com/@liga_metropolitana_eje';
+export const YOUTUBE_URL   = 'https://www.youtube.com/@limbearagua';

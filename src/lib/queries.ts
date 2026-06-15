@@ -355,6 +355,19 @@ export async function getTodasNoticias(): Promise<Noticia[]> {
   } catch { return []; }
 }
 
+/** Una noticia puntual por su ID (para la página de detalle). */
+export async function getNoticiaById(id: string): Promise<Noticia | null> {
+  const db = getDb();
+  try {
+    const { doc, getDoc } = await import('firebase/firestore');
+    const snap = await getDoc(doc(db, 'noticias', id));
+    if (!snap.exists()) return null;
+    return { id: snap.id, ...snap.data() } as Noticia;
+  } catch {
+    return null;
+  }
+}
+
 /** Para el strip de partidos del home: trae EN VIVO + próximos + recientes
  *  de TODAS las categorías. Ordenado por relevancia (live primero, después fecha). */
 export async function getPartidosParaStrip(): Promise<Partido[]> {

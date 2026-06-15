@@ -34,8 +34,9 @@ export default async function NoticiasPage() {
             const cuerpo = cuerpoDeNoticia(n);
             const dest   = esDestacada(n);
             return (
-              <article
+              <Link
                 key={n.id}
+                href={`/noticia/${n.id}`}
                 className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl shadow-card card-hover overflow-hidden flex flex-col"
               >
                 <div className="relative aspect-video bg-[var(--color-bg-alt)]">
@@ -67,7 +68,7 @@ export default async function NoticiasPage() {
                     </p>
                   )}
                 </div>
-              </article>
+              </Link>
             );
           })}
         </div>

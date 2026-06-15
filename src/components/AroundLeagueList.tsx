@@ -20,7 +20,7 @@ export function AroundLeagueList({ noticias }: { noticias: Noticia[] }) {
           return (
             <li key={n.id}>
               <Link
-                href="/noticias"
+                href={`/noticia/${n.id}`}
                 className="flex gap-4 px-5 py-4 hover:bg-[var(--color-card-2)] transition-colors"
               >
                 {img ? (

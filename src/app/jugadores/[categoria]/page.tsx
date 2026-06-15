@@ -10,13 +10,15 @@ import type { Jugador } from '@/types';
 
 export const revalidate = 300;
 
-type StatKey = 'puntos' | 'rebotes' | 'robos' | 'triples' | 'bloqueos';
+type StatKey = 'puntos' | 'rebotes' | 'asistencias' | 'robos' | 'triples' | 'bloqueos' | 'dobles';
 const STAT_LABELS: Record<StatKey, { label: string; unit: string; color: string }> = {
-  puntos:   { label: 'Goleadores', unit: 'PPP',          color: 'text-liga-gold' },
-  rebotes:  { label: 'Rebotes',    unit: 'RPP',          color: 'text-liga-final' },
-  robos:    { label: 'Robos',      unit: 'por partido',  color: 'text-blue-300' },
-  triples:  { label: 'Triples',    unit: 'por partido',  color: 'text-purple-300' },
-  bloqueos: { label: 'Bloqueos',   unit: 'por partido',  color: 'text-liga-live' },
+  puntos:      { label: 'Goleadores',  unit: 'PPP',         color: 'text-liga-gold' },
+  rebotes:     { label: 'Rebotes',     unit: 'RPP',         color: 'text-liga-final' },
+  asistencias: { label: 'Asistencias', unit: 'APP',         color: 'text-orange-300' },
+  robos:       { label: 'Robos',       unit: 'por partido', color: 'text-blue-300' },
+  triples:     { label: 'Triples',     unit: 'por partido', color: 'text-purple-300' },
+  bloqueos:    { label: 'Bloqueos',    unit: 'por partido', color: 'text-liga-live' },
+  dobles:      { label: 'Dobles',      unit: 'por partido', color: 'text-blue-200' },
 };
 
 function rankBy(jugadores: Jugador[], stat: StatKey, n = 10) {
@@ -48,11 +50,13 @@ export default async function JugadoresPorCategoriaPage({ params }: { params: { 
   const jugadores = await getJugadoresPorCategoria(c.id as CategoriaId);
 
   const rankings = {
-    puntos:   rankBy(jugadores, 'puntos',   10),
-    rebotes:  rankBy(jugadores, 'rebotes',  5),
-    robos:    rankBy(jugadores, 'robos',    5),
-    triples:  rankBy(jugadores, 'triples',  5),
-    bloqueos: rankBy(jugadores, 'bloqueos', 5),
+    puntos:      rankBy(jugadores, 'puntos',      10),
+    rebotes:     rankBy(jugadores, 'rebotes',     5),
+    asistencias: rankBy(jugadores, 'asistencias', 5),
+    robos:       rankBy(jugadores, 'robos',       5),
+    triples:     rankBy(jugadores, 'triples',     5),
+    bloqueos:    rankBy(jugadores, 'bloqueos',    5),
+    dobles:      rankBy(jugadores, 'dobles',      5),
   };
 
   return (

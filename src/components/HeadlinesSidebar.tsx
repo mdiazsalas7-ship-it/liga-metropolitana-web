@@ -24,7 +24,7 @@ export function HeadlinesSidebar({ noticias }: { noticias: Noticia[] }) {
           return (
             <li key={n.id}>
               <Link
-                href="/noticias"
+                href={`/noticia/${n.id}`}
                 className="flex items-start gap-3 px-4 py-3 hover:bg-[var(--color-card-2)] transition-colors"
               >
                 {img ? (
