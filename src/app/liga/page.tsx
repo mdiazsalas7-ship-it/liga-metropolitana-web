@@ -20,12 +20,17 @@ const SEDES = [
   {
     nombre: 'Cancha 23 de Enero',
     detalle: 'Casa principal · Cancha de usos múltiples',
-    direccion: 'Calle 25 de Marzo cruce con calle Páez, San Mateo — Municipio Bolívar, Aragua',
+    direccion: 'San Mateo — Municipio Bolívar, Aragua',
   },
   {
-    nombre: 'Cancha Santa Eduviges',
+    nombre: 'Cancha Carlos Salas',
     detalle: 'Sede de desarrollo y competición',
-    direccion: 'Sector Santa Eduviges — Municipio Bolívar, Aragua',
+    direccion: 'San Mateo — Municipio Bolívar, Aragua',
+  },
+  {
+    nombre: 'Cancha Madera 15',
+    detalle: 'Sede de desarrollo y competición',
+    direccion: 'La Victoria — Municipio José Félix Ribas, Aragua',
   },
 ];
 
@@ -70,7 +75,7 @@ export default function LigaPage() {
         <h2 className="text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase mb-3 border-b-2 border-liga-coral pb-2">
           Nuestra misión
         </h2>
-        <div className="space-y-4 text-[15px] sm:text-base text-[var(--color-text)] leading-relaxed">
+        <div className="space-y-4 text-[15px] sm:text-base text-[var(--color-text)] leading-relaxed text-justify hyphens-auto">
           <p>
             La Asociación Civil Deportiva Liga Metropolitana de Baloncesto del Eje Este del Estado Aragua —conocida por sus siglas <strong>L.I.M.B.E.A.</strong>— es una organización deportiva sin fines de lucro, legalmente constituida para ser el motor del deporte en nuestra región.
           </p>
@@ -85,7 +90,7 @@ export default function LigaPage() {
         <h2 className="text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase mb-3 border-b-2 border-liga-coral pb-2">
           Estructura competitiva
         </h2>
-        <p className="text-[15px] sm:text-base text-[var(--color-text)] leading-relaxed mb-5">
+        <p className="text-[15px] sm:text-base text-[var(--color-text)] leading-relaxed text-justify hyphens-auto mb-5">
           Organizamos campeonatos, torneos y clínicas para todos los niveles. Una estructura amplia y progresiva: desde las bases formativas con el <strong>mini basket</strong>, pasando por todo el ciclo de desarrollo juvenil hasta la categoría <strong>U20</strong>, y abriendo espacios para la competición adulta y laboral con nuestros torneos <strong>Interindustriales</strong>.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -108,10 +113,10 @@ export default function LigaPage() {
         <h2 className="text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase mb-3 border-b-2 border-liga-coral pb-2">
           Sedes y canchas
         </h2>
-        <p className="text-[15px] sm:text-base text-[var(--color-text)] leading-relaxed mb-5">
-          El epicentro de nuestra acción deportiva se concentra en instalaciones estratégicas del Municipio Bolívar, donde se forma el talento del eje este.
+        <p className="text-[15px] sm:text-base text-[var(--color-text)] leading-relaxed text-justify hyphens-auto mb-5">
+          El epicentro de nuestra acción deportiva se concentra en instalaciones estratégicas del eje este, donde se forma el talento de la región.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {SEDES.map(s => (
             <div key={s.nombre} className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card p-5">
               <div className="flex items-start gap-3">
@@ -132,7 +137,7 @@ export default function LigaPage() {
         <h2 className="text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase mb-3 border-b-2 border-liga-coral pb-2">
           Aval institucional
         </h2>
-        <p className="text-[15px] sm:text-base text-[var(--color-text)] leading-relaxed mb-5">
+        <p className="text-[15px] sm:text-base text-[var(--color-text)] leading-relaxed text-justify hyphens-auto mb-5">
           La L.I.M.B.E.A. está debidamente registrada y reconocida por la Asociación de Baloncesto del Estado Aragua, y afiliada a la Federación Venezolana de Baloncesto (F.V.B.). Este aval nos permite dirigir, coordinar y respaldar oficialmente las actuaciones de todos los clubes afiliados, proyectando a nuestros jugadores en competencias zonales y nacionales. La liga fue protocolizada oficialmente en La Victoria el 20 de febrero de 2026.
         </p>
         <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-card divide-y divide-[var(--color-border)]">
@@ -150,7 +155,7 @@ export default function LigaPage() {
         <h2 className="text-xs font-extrabold tracking-[0.13em] text-[var(--color-text)] uppercase mb-3 border-b-2 border-liga-coral pb-2">
           Contacto
         </h2>
-        <p className="text-[15px] sm:text-base text-[var(--color-text)] leading-relaxed mb-5">
+        <p className="text-[15px] sm:text-base text-[var(--color-text)] leading-relaxed text-justify hyphens-auto mb-5">
           Para inscripciones, alianzas estratégicas, patrocinios o más información sobre los torneos, escribinos:
         </p>
 
