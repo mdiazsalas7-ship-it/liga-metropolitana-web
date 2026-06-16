@@ -17,3 +17,9 @@ export const LEAGUE_LOGO_URL = 'https://i.postimg.cc/hhF5fTPn/image.png';
 export const INSTAGRAM_URL = 'https://www.instagram.com/liga_metropolitana_eje_este';
 export const TIKTOK_URL    = 'https://www.tiktok.com/@liga_metropolitana_eje';
 export const YOUTUBE_URL   = 'https://www.youtube.com/@limbearagua';
+
+// Contacto
+// WhatsApp: 0424-3740258 → formato internacional Venezuela (+58, sin el 0 inicial)
+export const WHATSAPP_NUMERO  = '0424-3740258';
+export const WHATSAPP_URL     = 'https://wa.me/584243740258';
+export const CONTACTO_EMAIL: string = ''; // ← completar cuando tengan email oficial

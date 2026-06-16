@@ -18,6 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/jugadores`,  changeFrequency: 'daily',   priority: 0.7, lastModified: now },
     { url: `${SITE_URL}/entrevistas`, changeFrequency: 'daily',  priority: 0.7, lastModified: now },
     { url: `${SITE_URL}/noticias`,   changeFrequency: 'daily',   priority: 0.8, lastModified: now },
+    { url: `${SITE_URL}/liga`,       changeFrequency: 'monthly', priority: 0.6, lastModified: now },
   ];
 
   // Páginas de cada categoría

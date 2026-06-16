@@ -51,7 +51,11 @@ export function SiteFooter() {
 
         {/* Línea final */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-4 border-t border-[var(--color-border)] text-xs text-[var(--color-text-dim2)]">
-          <p>© 2026 Liga Metropolitana Eje Este</p>
+          <div className="flex items-center gap-3">
+            <p>© 2026 Liga Metropolitana Eje Este</p>
+            <span className="text-[var(--color-text-dim2)]">·</span>
+            <a href="/liga" className="hover:text-[var(--color-text-dim)] font-semibold transition-colors">La Liga</a>
+          </div>
           <p>
             Powered by <span className="text-liga-coral font-bold">El Comisionado</span>
           </p>

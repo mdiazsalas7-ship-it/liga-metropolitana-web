@@ -9,6 +9,7 @@ const NAV = [
   { href: '/jugadores',   label: 'Estadísticas' },
   { href: '/entrevistas', label: 'Videos' },
   { href: '/noticias',    label: 'Noticias' },
+  { href: '/liga',        label: 'La Liga' },
 ];
 
 export function SiteHeader() {
